@@ -1,23 +1,24 @@
 # AlarmCast
 
-Interne Windows-Anwendung fuer Alarmuebertragung und persistentes Firmen-Messaging.
+Interne Windows-Anwendung fuer direkte Alarmuebertragung und persistentes Firmen-Messaging.
 
 ## Projektstatus
 
-Das Repository wird aktuell fuer eine inkrementelle, testgesteuerte Umsetzung mit Codex vorbereitet.
+Spezifikation und Zielarchitektur sind freigegeben. Die Umsetzung erfolgt testgesteuert in autonomen, klar begrenzten Codex-Etappen.
 
 Verbindliche Dokumente:
 
-- [`AGENTS.md`](AGENTS.md) – Regeln fuer alle Coding-Agents
-- [`docs/specification-1.0.md`](docs/specification-1.0.md) – freigegebene fachliche Spezifikation
-- [`docs/target-architecture.md`](docs/target-architecture.md) – technische Zielarchitektur
-- [`docs/implementation-roadmap.md`](docs/implementation-roadmap.md) – kleine, abhaengige Entwicklungsinkremente
+- [`AGENTS.md`](AGENTS.md) – harte Regeln fuer Codex, Cursor und andere Agents
+- [`docs/specification-1.0.md`](docs/specification-1.0.md) – freigegebene Fachanforderungen
+- [`docs/domain-model.md`](docs/domain-model.md) – kanonische Entitaeten, Tabellen, Status und Invarianten
+- [`docs/target-architecture.md`](docs/target-architecture.md) – fester Stack, Module und Entry Points
+- [`docs/implementation-roadmap.md`](docs/implementation-roadmap.md) – Etappen und Inkremente
 - [`docs/test-strategy.md`](docs/test-strategy.md) – automatisierte und manuelle Testebenen
-- [`docs/definition-of-done.md`](docs/definition-of-done.md) – Green Gate
-- [`tasks/ACTIVE_TASK.md`](tasks/ACTIVE_TASK.md) – einziger aktuell ausfuehrbarer Codex-Task
+- [`docs/definition-of-done.md`](docs/definition-of-done.md) – Green Gates fuer Inkrement und Etappe
+- [`tasks/ACTIVE_STAGE.md`](tasks/ACTIVE_STAGE.md) – einzige aktuelle Arbeitsfreigabe
 
 ## Arbeitsregel
 
-Codex bearbeitet pro Task und Draft-Pull-Request genau ein freigegebenes Inkrement. Ein Folgeinkrement wird erst nach Review und bestaetigtem Green Gate aktiviert.
+Codex darf innerhalb der aktiven Etappe nach jedem vollstaendig gruenen Inkrement selbststaendig fortfahren. Pro Inkrement entsteht ein Commit. Nach dem letzten Inkrement der Etappe oeffnet Codex einen Draft-PR und stoppt. Eine Folgeetappe wird niemals autonom aktiviert.
 
-Der urspruengliche Alarmcast-Quellcode wird im Baseline-Inkrement B00 unveraendert importiert. Erst danach beginnen CI, Architektur-Guards und die kontrollierte Erweiterung.
+Der originale Alarmcast-Code wird in STAGE-01 unveraendert importiert und durch CI, Architekturguards und sichere Konfigurationspersistenz geschuetzt. Erst danach beginnt die fachliche Erweiterung.
