@@ -14,6 +14,7 @@ Lies die in `AGENTS.md` festgelegte Reihenfolge. Pruefe danach:
 
 ```text
 git status --short
+git branch --show-current
 ls bootstrap
 sha256sum bootstrap/alarmcast-baseline.zip
 ```
@@ -24,7 +25,7 @@ Unter Windows darf statt `sha256sum` verwendet werden:
 Get-FileHash bootstrap\alarmcast-baseline.zip -Algorithm SHA256
 ```
 
-Erwartete Werte stehen in `tasks/ACTIVE_TASK.md`. Bei jeder Abweichung sofort stoppen.
+Erwartete Werte und der erlaubte Branch stehen in `tasks/ACTIVE_STAGE.md`. Bei jeder Abweichung sofort stoppen.
 
 ## 3. In Scope
 
@@ -41,19 +42,23 @@ Erwartete Werte stehen in `tasks/ACTIVE_TASK.md`. Bei jeder Abweichung sofort st
    - `*.log`
    - `host.json`, `client.json`, `mode.txt`
    - lokale PSKs, Tokens oder Rechneradressen.
-4. Alle echten Quell-, Test-, Dokumentations-, Build- und Cursor-Dateien aus dem Archiv in die Repository-Wurzel uebernehmen.
-5. Die bereits vorhandenen Governance-Dateien aus dem Roadmap-PR nicht durch aeltere Archivversionen ersetzen:
+4. Alle echten Quell-, Test-, Dokumentations- und Builddateien aus dem Archiv in die Repository-Wurzel uebernehmen.
+5. Die bereits vorhandenen Governance-Dateien nicht durch Archivversionen ersetzen:
    - `AGENTS.md`
+   - `README.md`
    - `docs/specification-1.0.md`
+   - `docs/domain-model.md`
    - `docs/target-architecture.md`
    - `docs/implementation-roadmap.md`
    - `docs/test-strategy.md`
    - `docs/definition-of-done.md`
+   - `docs/decisions/**`
    - `tasks/**`
    - `.cursor/rules/00-agent-workflow.mdc`
-6. Bei Namenskonflikten mit anderen vorhandenen Dateien stoppen und den Konflikt dokumentieren, statt Inhalte zusammenzumischen.
-7. `bootstrap/alarmcast-baseline.zip` nach erfolgreicher, verifizierter Uebernahme aus dem Repository entfernen.
-8. `docs/baseline-report.md` erstellen mit:
+6. Weitere Cursor-Dateien aus dem Archiv nur uebernehmen, sofern sie den aktuellen Governance-Regeln nicht widersprechen. Bei Widerspruch stoppen und dokumentieren.
+7. Bei sonstigen Namenskonflikten stoppen, statt Inhalte zusammenzumischen.
+8. `bootstrap/alarmcast-baseline.zip` und `bootstrap/UPLOAD-HERE.md` nach erfolgreicher Verifikation entfernen.
+9. `docs/baseline-report.md` erstellen mit:
    - Archiv-Pruefsumme,
    - uebernommenen Dateipfaden,
    - bewusst ausgeschlossenen Pfaden,
@@ -105,7 +110,7 @@ Pruefe per Suche, dass keine lokalen Konfigurationsdateien, Logs, Buildartefakte
 - Generierte `*.egg-info`-Verzeichnisse wurden nicht uebernommen.
 - Keine Produktdatei wurde inhaltlich veraendert.
 - Governance-Dateien bleiben in ihrer neuen Version erhalten.
-- Das Bootstrap-ZIP ist nach erfolgreicher Uebernahme entfernt.
+- Bootstrap-ZIP und Uploadhinweis sind entfernt.
 - `docs/baseline-report.md` ist vollstaendig.
 - Alle moeglichen Baseline-Pruefungen sind ehrlich dokumentiert.
 
@@ -114,18 +119,27 @@ Pruefe per Suche, dass keine lokalen Konfigurationsdateien, Logs, Buildartefakte
 Sofort stoppen bei:
 
 - falscher Pruefsumme,
+- falschem Branch,
 - verschluesseltem oder beschaedigtem Archiv,
 - echtem Secret oder produktiver Konfiguration im Archiv,
+- widerspruechlicher Cursor-/Agentenregel im Archiv,
 - unklarem Namenskonflikt,
 - Dateien ausserhalb der erwarteten Alarmcast-Projektstruktur,
 - Notwendigkeit, Produktcode zu aendern, damit Tests laufen.
 
-## 8. Abschluss
+## 8. Abschluss innerhalb STAGE-01
 
-Erstelle einen Draft-PR mit Titel:
+Bei erfuelltem Gate:
+
+1. `docs/baseline-report.md` fertigstellen.
+2. Genau einen Commit erstellen:
 
 ```text
 B00 Import original Alarmcast baseline
 ```
 
-Der PR muss ausdruecklich sagen, dass keine Produktlogik geaendert wurde. Nach dem PR endet der Codex-Task. B01 wird nicht begonnen.
+3. Checkpoint in `tasks/stages/STAGE-01-baseline-and-guards.md` eintragen.
+4. Status `AUTO_GREEN` beziehungsweise den erlaubten Baseline-Sonderstatus dokumentieren.
+5. Direkt mit B01 derselben Etappe fortfahren.
+
+Nach B00 keinen Pull Request erstellen und keine Arbeit ausserhalb von STAGE-01 beginnen.
