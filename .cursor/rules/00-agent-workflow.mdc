@@ -1,0 +1,21 @@
+---
+description: Verbindlicher inkrementeller Arbeitsablauf fuer alle schreibenden KI-Agents
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Verbindlicher Agent-Workflow
+
+1. Lies vor jeder Aenderung `AGENTS.md`.
+2. Bearbeite ausschliesslich den Task aus `tasks/ACTIVE_TASK.md`.
+3. Ist dieser Task nicht mit `READY` markiert, darfst du keine Datei aendern.
+4. Lies die dort verlinkte Inkrementdatei vollstaendig.
+5. Fuehre vor dem ersten Edit die Baseline-Pruefungen aus.
+6. Aendere nichts ausserhalb des ausdruecklichen Scopes.
+7. Beginne niemals eigenstaendig den naechsten Roadmap-Punkt.
+8. Fuehre alle taskbezogenen Tests und das Green Gate aus.
+9. Dokumentiere nicht ausgefuehrte Tests ehrlich als `NOT RUN`.
+10. Beende die Arbeit mit einem Draft-PR und dem Abschlussbericht aus `AGENTS.md`.
+
+Bei Widerspruch, neuer Top-Level-Abhaengigkeit, notwendiger Architekturentscheidung oder Gefahr fuer bestehende Alarmcast-Funktionen: stoppen und konkret nachfragen.
