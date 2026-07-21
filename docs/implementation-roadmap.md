@@ -1,663 +1,616 @@
 # Implementierungs-Roadmap
 
-## 1. Zweck
+**Status:** verbindlicher Ausfuehrungsplan fuer Spezifikation 1.0  
+**Arbeitsform:** autonome Etappen mit kleinen, einzeln committed Inkrementen.
 
-Diese Roadmap zerlegt Spezifikation 1.0 in kleine, fachlich zusammenhaengende und einzeln pruefbare Codex-Inkremente. Codex bearbeitet pro Task und Draft-PR genau ein Inkrement.
+## 1. Ausfuehrungsmodell
+
+Codex bearbeitet nicht die gesamte Roadmap auf einmal. `tasks/ACTIVE_STAGE.md` aktiviert genau eine Etappe.
+
+Innerhalb einer aktiven Etappe gilt:
+
+1. Inkremente exakt in angegebener Reihenfolge.
+2. Vor jedem Inkrement Baseline/Gate ausfuehren.
+3. Nur bei `AUTO_GREEN` selbststaendig fortfahren.
+4. Genau ein Commit pro Inkrement.
+5. Am Etappenende Draft-PR erstellen und stoppen.
+6. Keine Folgeetappe selbst aktivieren oder beginnen.
 
 Statuswerte:
 
-- `PLANNED` – fachlich vorgesehen, aber noch nicht ausfuehrbar,
-- `BLOCKED` – Voraussetzung oder menschliche Entscheidung fehlt,
-- `READY` – einziges zur Umsetzung freigegebenes Inkrement,
-- `IN_PROGRESS` – Codex-Task beziehungsweise PR laeuft,
-- `REVIEW` – Umsetzung ist abgeschlossen und wird geprueft,
-- `DONE` – Green Gate bestaetigt und gemergt.
+- `PLANNED` – zukuenftig, nicht freigegeben,
+- `READY` – aktive Etappe darf beginnen,
+- `IN_PROGRESS` – Agent arbeitet daran,
+- `AUTO_GREEN` – automatisches Gate gruen, naechstes Inkrement derselben Etappe erlaubt,
+- `MANUAL_PENDING` – automatische Gates gruen, benannter manueller Test steht noch aus,
+- `BLOCKED` – Stop-Bedingung,
+- `REVIEW` – Etappen-PR ist offen,
+- `DONE` – reviewed und gemergt.
 
-Nur `tasks/ACTIVE_TASK.md` darf auf ein `READY`-Inkrement zeigen. Codex springt nach Abschluss niemals selbststaendig weiter.
+Die kanonischen Strukturen und Namen stehen in:
 
-## 2. Globales Green Gate
+- `docs/domain-model.md`
+- `docs/target-architecture.md`
+- `AGENTS.md`
 
-Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
+Roadmaptexte sind keine Erlaubnis, davon abweichende Strukturen zu erfinden.
 
-1. sauberer Working Tree vor Beginn,
-2. Baseline-Pruefung dokumentiert,
-3. Scope und Nicht-Ziele eingehalten,
-4. passende neue Tests vorhanden,
-5. relevante Alt-Tests gruen,
-6. `ruff check .` gruen,
-7. `ruff format --check .` gruen,
-8. `mypy src` gruen oder taskbezogen enger begruendet,
-9. `pytest -q` gruen,
-10. erforderlicher Windows-Smoke-Test dokumentiert,
-11. keine unerwarteten Dateien oder Abhaengigkeiten,
-12. Draft-PR mit Abschlussbericht.
+## 2. Globales automatisches Gate
 
-## 3. Phase B – Baseline und Governance
+Vor Fortsetzung zum naechsten Inkrement derselben Etappe muessen gruen sein:
+
+```text
+ruff check .
+ruff format --check .
+mypy src
+pytest -q
+```
+
+Zusaetzlich:
+
+- alle inkrementspezifischen Tests,
+- Architekturtests,
+- Migrations-/Integrationspruefungen, falls betroffen,
+- keine neue unfreigegebene Dependency,
+- keine unerwartete Produktdatei,
+- keine Spezifikations- oder Datenmodellabweichung,
+- kein bestehendes Alarmcast-Verhalten entfernt,
+- Checkpoint-Bericht erstellt.
+
+Manuelle Windows-Tests duerfen nur dann `MANUAL_PENDING` sein, wenn die aktive Etappendatei dies ausdruecklich als nicht blockierend einstuft. Sie bleiben Etappen-PR-Gate.
+
+## 3. Etappenuebersicht
+
+| Etappe | Inkremente | Ergebnis | Autonom bis |
+|---|---|---|---|
+| STAGE-01 Baseline und Schutz | B00–B03 | sauberer Originalstand, CI, Guards, sichere Bestandsconfig | B03 |
+| STAGE-02 Alarmcast kapseln | A01–A06 | stabile Fassaden, Overlay-Koordinator, gemeinsame Shell | A06 |
+| STAGE-03 Serverfundament | S01–S04 | FastAPI/Uvicorn, PostgreSQL/Alembic, Basisvertraege | S04 |
+| STAGE-04 Geraete und Identitaet | D01–D08 | Registrierung, Admin/User, exklusive Sessions, Presence | D08 |
+| STAGE-05 Messaging-Kern | M01–M13 | Conversations, append-only Messages, Zustellung, Offline | M13 |
+| STAGE-06 Gruppen | G01–G08 | Rollen, Historie, Eigentum, Archivierung | G08 |
+| STAGE-07 Desktop-Messaging | U01–U07 | Kontaktliste, Chat-UIs, Zitate, Reaktionen, Clipboard | U07 |
+| STAGE-08 Dringlichkeit, Screenshots, Suche | N01–N06 | Screenshotstore, Search, persistente Urgent-Overlays | N06 |
+| STAGE-09 Alarmcast-Gesamtintegration | I01–I06 | Mehrquellen, Rechte, Logs, Ausfallwarnungen, Migration | I06 |
+| STAGE-10 Betrieb | O01–O06 | Archiv, Backup/Restore, Windows-Dienst, Installer | O06 |
+| STAGE-11 Systemabnahme | R01–R04 | E2E, Ausfalltests, Traceability, Release Candidate | R04 |
+
+## 4. STAGE-01 – Baseline und Schutzschicht
 
 ### B00 – Originalen Alarmcast-Bestand importieren
 
-**Status:** `BLOCKED` bis `bootstrap/alarmcast-baseline.zip` vorhanden ist.  
-**Ziel:** Den originalen hochgeladenen Alarmcast-Stand unveraendert als Repository-Baseline herstellen.  
-**Scope:** ZIP entpacken, generierte `*.egg-info`-Dateien ausschliessen, Bootstrap-ZIP entfernen, Dateiliste und SHA-256 dokumentieren. Keine Produktcodeaenderung.  
-**Tests:** vorhandene Befehle ausfuehren; Abweichungen als Baseline dokumentieren; `python -m compileall src`.  
-**Green Gate:** Inhalt entspricht dem Archiv; keine Secrets oder lokalen Konfigurationen; App-Quellcode, Tests und Builddateien liegen im Repo.
+**Status:** `READY` nach verifizierter ZIP.  
+**Detaillierter Task:** `tasks/increments/B00-import-baseline.md`
 
-### B01 – Reproduzierbare Entwicklungsumgebung und CI
+**Erlaubte Aenderungen:**
 
-**Status:** `PLANNED`  
+- Dateien aus dem verifizierten Archiv in kanonische Originalpfade uebernehmen,
+- generierte Artefakte ausschliessen,
+- `docs/baseline-report.md`,
+- Bootstrap-ZIP/Uploadhinweis entfernen.
+
+**Verboten:** Produktcode editieren, formatieren, umbenennen oder reorganisieren.
+
+**Gate:** Archivhash korrekt; Quellcode identisch; keine Secrets; Compile/Test-Baseline dokumentiert.
+
+### B01 – Python-3.12-Entwicklungsumgebung und CI
+
 **Abhaengigkeit:** B00.  
-**Ziel:** Python-3.12-Umgebung und GitHub Actions fuer Baseline-Pruefungen.  
-**Scope:** Lock-/Installationsweg dokumentieren, Windows-CI fuer Lint, Format, Typen und Tests; keine Produktfunktion.  
-**Tests:** Workflow lokal soweit moeglich validieren; CI muss auf Pull Requests laufen.  
-**Green Gate:** frischer Checkout kann anhand README eingerichtet werden; CI meldet Baseline reproduzierbar.
+**Detaillierter Task:** `tasks/increments/B01-development-ci.md`
 
-### B02 – Architektur- und Scope-Guards
+**Exakte Owner/Pfade:**
 
-**Status:** `PLANNED`  
+- `pyproject.toml`,
+- `.github/workflows/ci.yml`,
+- `README.md`,
+- optional ausschliesslich testbezogene Konfiguration unter `tests/`.
+
+**Nicht anlegen:** Poetry/PDM/Hatch/uv-Konfiguration, Docker-Produktionssetup, zweites pyproject, requirements-Wildwuchs.
+
+**Tests:** Windows CI mit Python 3.12; ruff, format, mypy, pytest; Build nicht erforderlich.
+
+### B02 – Architektur- und Repository-Guards
+
 **Abhaengigkeit:** B01.  
-**Ziel:** Automatische Schutztests fuer bestehende und kuenftige Modulgrenzen.  
-**Scope:** Tests gegen `core -> host/client`, `host <-> client`, verbotene Secrets/Configdateien und unerlaubte Entry Points.  
-**Tests:** positive und negative Fixture-Faelle fuer jeden Guard.  
-**Green Gate:** absichtlicher Regelverstoss laesst den Guard-Test fehlschlagen.
+**Detaillierter Task:** `tasks/increments/B02-architecture-guards.md`
 
-### B03 – Atomare, schema-versionierte Bestandskonfiguration
+**Exakte Owner/Pfade:**
 
-**Status:** `PLANNED`  
+- `tests/architecture/`,
+- nur falls erforderlich kleine Test-Helfer unter `tests/architecture/_fixtures/`.
+
+**Guards:**
+
+- `core` importiert nicht `host/client`,
+- `host` und `client` importieren nicht direkt voneinander,
+- nur kanonische Entry Points,
+- keine verbotenen Auffangmodule,
+- keine Secrets/Config/Logs/Buildartefakte,
+- kein zweites Top-Level-Produktpaket,
+- keine nicht freigegebenen Dependencies.
+
+**Verboten:** Produktcode fuer die Tests umbauen, generischen Dependency-Linter einfuehren, neues Tool ohne Freigabe.
+
+### B03 – Atomare und versionierte Bestandskonfiguration
+
 **Abhaengigkeit:** B02.  
-**Ziel:** `host.json` und `client.json` sicher, versioniert und rueckwaertskompatibel speichern.  
-**Scope:** atomarer Replace, Schema-Version, Migration unversionierter Dateien, Erhalt unbekannter oder dokumentiert verworfener Werte. Keine gemeinsame `app.json`.  
-**Tests:** Erststart, Altdatei, defekte JSON-Datei, Schreibabbruch, Roundtrip.  
-**Windows-Smoke:** bestehende Einstellungen bleiben nach Neustart erhalten.  
-**Green Gate:** kein stiller Datenverlust; alte Konfiguration wird korrekt migriert.
+**Detaillierter Task:** `tasks/increments/B03-config-persistence.md`
 
-## 4. Phase A – Alarmcast kapseln, Verhalten erhalten
+**Exakte Owner/Pfade:**
 
-### A01 – Alarmcast-Vertragsmodell
+- `src/alarmcast/core/config.py`,
+- falls im Original vorhanden: `src/alarmcast/core/mode_switch.py`,
+- zugehoerige Configtests.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** B03.  
-**Ziel:** Unveraenderliche Contracts fuer Quelle, Ueberwacher, Alarmstatus, Verbindung und Reset.  
-**Scope:** nur Contracts und Tests; keine UI- oder Laufzeitaenderung.  
-**Tests:** Enum-/Dataclass-Invarianten, keine Qt-/Sockettypen in Contracts.  
-**Green Gate:** Contracts bilden vorhandene Zustaende ohne Low-Level-Typen ab.
+**Noch nicht anlegen:** neues `settings/`-Modul, `app.json`, SQLite, DPAPI, Messagingconfig.
 
-### A02 – Fassade der Alarmcast-Quelle
+**Funktion:** atomarer Temp-Write + Replace, `schema_version`, sequenzielle Migration vorhandener `host.json/client.json`, Recovery ohne stillen Reset.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A01.  
-**Ziel:** Capture, Detector und HostServer hinter einer Source-Fassade kapseln.  
-**Scope:** Start, Stopp, Reset, Snapshot und fachliche Events; Netzwerkprotokoll unveraendert.  
-**Tests:** Adaptertests mit Fakes; bestehende Hosttests gruen.  
-**Windows-Smoke:** echter Host startet, erkennt Testsignal und resettiert.  
-**Green Gate:** Host-UI benoetigt keine direkten Low-Level-Aufrufe ausserhalb der Fassade.
+## 5. STAGE-02 – Alarmcast kapseln, Verhalten erhalten
 
-### A03 – Fassade des Alarmcast-Ueberwachers
+### A01 – Kanonische Alarmcast-Contracts
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A01.  
-**Ziel:** Discovery, ClientNetwork, AudioOutput und Alarmanzeige hinter Monitor-Fassade kapseln.  
-**Tests:** Reconnect, Mute, Lautstaerke, Hostwechsel, Statusmapping.  
-**Windows-Smoke:** Audio, manuelle Adresse, mDNS, Testton und Reset funktionieren.  
-**Green Gate:** Client-UI kennt keine Low-Level-Sockets oder Audio-Callbackobjekte.
+**Abhaengigkeit:** B03.
 
-### A04 – Gemeinsamer Alarmcast-Runtime-Service
+**Exakte neue Pfade:**
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A02, A03.  
-**Ziel:** Quelle und Ueberwacher koennen als unabhaengige Geraetefaehigkeiten in einem Prozess komponiert werden.  
-**Scope:** Lifecycle und Konfliktbehandlung; bestehende `--host`/`--client`-Starts bleiben kompatibel.  
-**Tests:** Source-only, Monitor-only, beide, geordnetes Shutdown, Doppeltstart.  
-**Green Gate:** keine gegenseitige Importabhaengigkeit zwischen Bestands-Host und -Client.
+```text
+src/alarmcast/alarmcast_runtime/__init__.py
+src/alarmcast/alarmcast_runtime/contracts.py
+src/alarmcast/alarmcast_runtime/domain.py
+```
 
-### A05 – Overlay-Koordinator-Grundgeruest
+**Contracts:** Source-/Monitorzustand, Alarm-ID, Quell-ID, Statussnapshot, typisierte Runtimeevents.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A04.  
-**Ziel:** Technische Koordination mehrerer Overlaytypen ohne Messaging-Fachlogik.  
-**Scope:** zentraler Alarm, bestehende Hostmeldungen, Ueberwachungsausfall-Platzhalter; Position und Prioritaet als Contracts.  
-**Tests:** Prioritaet, Multi-Monitor-Zielmenge, getrenntes Clear.  
-**Windows-Smoke:** bestehender Alarm erscheint weiterhin auf allen Monitoren.  
-**Green Gate:** Bestandsalarm wird ueber Koordinator angezeigt, ohne Verhaltensverlust.
+**Nicht anlegen:** `models.py`, `types.py`, zweite Fassade, Qt-/Socket-/Audio-Typen in Contracts.
+
+### A02 – SourceAdapter
+
+**Abhaengigkeit:** A01.
+
+**Exakte Pfade:**
+
+```text
+src/alarmcast/alarmcast_runtime/source_adapter.py
+```
+
+Bestehende `host.capture`, `host.detector`, `host.server` werden komponiert, nicht kopiert.
+
+**Gate:** bestehende Hosttests gruen; keine Protokollaenderung.
+
+### A03 – MonitorAdapter
+
+**Abhaengigkeit:** A01.
+
+**Exakte Pfade:**
+
+```text
+src/alarmcast/alarmcast_runtime/monitor_adapter.py
+```
+
+Bestehende `client.net`, `client.output`, Discovery und Overlay-Anbindung werden adaptiert, nicht kopiert.
+
+### A04 – Einzige AlarmcastRuntimeApi
+
+**Abhaengigkeit:** A02, A03.
+
+**Exakte Pfade:**
+
+```text
+src/alarmcast/alarmcast_runtime/api.py
+src/alarmcast/alarmcast_runtime/service.py
+```
+
+Quelle und Monitor sind unabhaengige Capabilities in einem Prozess. Keine `SourceApi` und `MonitorApi` als konkurrierende oeffentliche Fassaden.
+
+### A05 – Einziger OverlayCoordinator
+
+**Abhaengigkeit:** A04.
+
+**Exakte neue Pfade:**
+
+```text
+src/alarmcast/notifications/__init__.py
+src/alarmcast/notifications/contracts.py
+src/alarmcast/notifications/domain.py
+src/alarmcast/notifications/service.py
+src/alarmcast/notifications/overlay_coordinator.py
+```
+
+Bestehende Client-Overlays werden adaptiert. Noch kein Urgent-Messaging-Overlay.
+
+**Kanonische Typen:** `ALARMCAST_ALARM`, `ALARMCAST_INFO`, `ALARMCAST_CONFIRMATION`, `MONITORING_FAILURE`.
 
 ### A06 – Gemeinsame Desktop-App-Shell
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A04, A05.  
-**Ziel:** genau eine Qt-App, ein Tray und ein Composition Root.  
-**Scope:** Shell und Capability-Auswahl; noch kein Messaging.  
-**Tests:** Startup, Single Instance, Capability-Kombinationen, Shutdown.  
-**Windows-Smoke:** Tray, gespeicherter Modus und Alt-CLI funktionieren.  
-**Green Gate:** keine parallelen Qt-Entry-Points ausser dokumentierter Kompatibilitaet.
+**Abhaengigkeit:** A04, A05.
 
-## 5. Phase S – Serverentscheidungen und Serverfundament
+**Exakte neue Pfade:**
 
-### S01 – ADR: Server, Echtzeittransport und Datenbank
+```text
+src/alarmcast/app_shell/__init__.py
+src/alarmcast/app_shell/api.py
+src/alarmcast/app_shell/contracts.py
+src/alarmcast/app_shell/composition.py
+src/alarmcast/app_shell/main_window.py
+src/alarmcast/app_shell/tray.py
+```
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** B01.  
-**Ziel:** Vergleich und Freigabe der produktiven Servertechnologien fuer Windows-Betrieb.  
-**Scope:** ADR mit Kandidaten, Betriebsmodell, Migrationen, Transaktionen, Echtzeit, Backup, Testbarkeit und Lizenz; kein Produktcode und keine neue Dependency.  
-**Tests:** nicht anwendbar; Plausibilitaets- und Entscheidungscheckliste.  
-**Green Gate:** menschlich freigegebener ADR. Ohne Freigabe bleibt S02 blockiert.
+`src/alarmcast/__main__.py` bleibt einziger Entry Point und delegiert. Bestehende `--host/--client`-Wege bleiben gruen.
 
-### S02 – Server-Paket und Health-Endpunkt
+**Nicht anlegen:** zweite QApplication, zweites Tray, `launcher.py`, neuer CLI-Entry-Point.
 
-**Status:** `BLOCKED` bis S01 freigegeben.  
-**Abhaengigkeit:** S01.  
-**Ziel:** minimaler Serverprozess mit genau einem Entry Point und Health-Status.  
-**Scope:** Composition Root, Konfiguration, strukturierte Logs, kontrolliertes Shutdown; keine Fachdaten.  
-**Tests:** Start/Stop, Health, ungueltige Konfiguration, Portkonflikt.  
-**Green Gate:** Server laeuft auf Windows-Testumgebung reproduzierbar.
+## 6. STAGE-03 – Zentraler Server
 
-### S03 – Datenbankbasis und Migrationen
+Der Stack ist bereits in Zielarchitektur und ADR 0010 entschieden. Es gibt kein Technologieentscheidungsinkrement mehr.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** S02.  
-**Ziel:** transaktionale Persistenz, Migrationsrunner und Testdatenbank.  
-**Scope:** Infrastruktur, keine fachlichen Tabellen ausser technischer Migrationstabelle.  
-**Tests:** leere DB, Upgrade, Rollback-/Fehlerfall, paralleler Start.  
-**Green Gate:** frische und bestehende Testdatenbank erreichen denselben Schema-Stand.
+### S01 – Serverpaket, FastAPI-App und Health
 
-### S04 – Serverseitige Uhr, IDs und Transaktions-Ports
+**Abhaengigkeit:** STAGE-01.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** S03.  
-**Ziel:** zentrale opaque IDs, UTC-Zeit und testbare Transaktionsgrenzen.  
-**Tests:** deterministische Fake-Clock, ID-Eindeutigkeit, Rollback.  
-**Green Gate:** Fachmodule verwenden keine direkte Systemzeit oder zufaellige IDs ausser ueber Ports.
+**Freigegebene neue Dependencies:** `fastapi`, `uvicorn`, `pydantic` als transitive/direkte FastAPI-Grundlage. Keine weiteren Serverframeworks.
 
-## 6. Phase D – Geraete, Nutzer und Sitzungen
+**Exakte Pfade:**
 
-### D01 – Stabile lokale Geraeteidentitaet
+```text
+src/alarmcast_server/__init__.py
+src/alarmcast_server/__main__.py
+src/alarmcast_server/app.py
+src/alarmcast_server/composition.py
+src/alarmcast_server/config.py
+src/alarmcast_server/transport/http/health_routes.py
+```
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A06, S04.  
-**Ziel:** interne Geraete-ID plus administrierter Windows-Hostname.  
-**Tests:** Erststart, Neustart, Hostname-Aenderung, kopierte Konfiguration.  
-**Green Gate:** Geraete-ID bleibt stabil; sichtbarer Name folgt dem Windows-PC-Namen.
+**Einziger Endpunkt:** `GET /api/v1/health`.
 
-### D02 – Geraeteregistrierung am Server
+**Nicht anlegen:** Fachdaten, DB-Modelle, Auth, WebSocket, zweite App-Fabrik.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D01.  
-**Ziel:** Registrierung und Aktualisierung eines Geraets ohne Nutzeranmeldung.  
-**Tests:** neu, bekannt, umbenannt, doppelte ID, ungueltiger Hostname.  
-**Green Gate:** Server fuehrt eindeutige Geraete ohne Chatfunktion.
+### S02 – PostgreSQL und Alembic-Basis
 
-### D03 – Heartbeat und Geraete-Presence
+**Abhaengigkeit:** S01.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D02.  
-**Ziel:** `ONLINE`, `OFFLINE`, `CONNECTION_UNSTABLE` durch Heartbeat und Ablaufzeit.  
-**Tests:** regelmaessig, Timeout, Wiederkehr, geordnetes Logout, Serverneustart.  
-**Green Gate:** abrupt beendeter Client wird ohne explizites Logout offline.
+**Freigegebene Dependencies:** `sqlalchemy`, `alembic`, `psycopg`.
 
-### D04 – Systemadministrator-Prinzipal
+**Exakte Pfade:**
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** S04.  
-**Ziel:** administrative Identitaet ohne automatische Chatmitgliedschaft.  
-**Tests:** Admin-Metadatenzugriff erlaubt, Chatinhalt-API verweigert.  
-**Green Gate:** Adminrolle erzeugt keine Conversation-Berechtigung.
+```text
+migrations/env.py
+migrations/versions/
+src/alarmcast_server/infrastructure/database/models.py
+src/alarmcast_server/infrastructure/database/session_factory.py
+src/alarmcast_server/infrastructure/database/unit_of_work.py
+```
 
-### D05 – Administrative Nutzerverwaltung
+Noch keine fachlichen Tabellen ausser technischer Alembic-Versionierung.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D04.  
-**Ziel:** Nutzer anlegen, umbenennen, deaktivieren und Passwort zuruecksetzen.  
-**Tests:** eindeutige Namen, Deaktivierung, Passwort optional, privilegiertes Konto ohne Passwort verboten.  
-**Green Gate:** normale Nutzer koennen keine Konten selbst erstellen.
+**Verboten:** `create_all()` im Produktstart, SQLite als Serverdatenbank, generisches BaseRepository.
 
-### D06 – Nutzeranmeldung
+### S03 – Clock, IDs und Transaktionsports
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D05, D02.  
-**Ziel:** Anmeldung mit optionalem Passwort und Geraetebindung der Sitzung.  
-**Tests:** ohne Passwort, korrekt/falsch, deaktiviert, unbekannt.  
-**Green Gate:** Passwort-Hash statt Klartext; Fehler geben keine sensiblen Details preis.
+**Abhaengigkeit:** S02.
 
-### D07 – Exklusive Nutzersitzung
+**Exakte Pfade:**
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D06.  
-**Ziel:** genau eine aktive Sitzung je Nutzer.  
-**Tests:** erste Anmeldung, Wechsel auf zweiten PC, Rennen zweier Logins, alter Client erhaelt Logout.  
-**Green Gate:** zu keinem Zeitpunkt bleiben zwei gueltige Sitzungen bestehen.
+```text
+src/alarmcast_server/infrastructure/clock.py
+src/alarmcast_server/infrastructure/ids.py
+```
 
-### D08 – Nutzer-Presence
+Fachmodule verwenden injizierbare Ports; keine direkte Systemzeit/uuid4 ausser Adapter.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D07, D03.  
-**Ziel:** `OFFLINE`, `AVAILABLE`, `AWAY`, `DO_NOT_DISTURB`.  
-**Tests:** Inaktivitaet, manueller Status, Logout, Geraeteausfall.  
-**Green Gate:** dringliche und Alarmwarnungen werden durch DND nicht unterdrueckt.
+### S04 – Fehlervertrag und ein WebSocket-Hub
 
-## 7. Phase M – Messaging-Kern
+**Abhaengigkeit:** S03.
 
-### M01 – Conversation- und Mitgliedschaftsmodell
+**Exakte Pfade:**
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** D07.  
-**Ziel:** gemeinsame Grundlage fuer User-, Device- und Group-Conversations.  
-**Tests:** Typinvarianten, Mitgliedschaft, Berechtigungsabfragen.  
-**Green Gate:** keine Nachrichtentabelle und keine UI in diesem Inkrement.
+```text
+src/alarmcast_server/transport/http/error_contracts.py
+src/alarmcast_server/transport/realtime/contracts.py
+src/alarmcast_server/transport/realtime/connection_hub.py
+src/alarmcast_server/transport/realtime/ws_routes.py
+```
 
-### M02 – Append-only-Nachrichtenpersistenz
+**Einziger WebSocket:** `/api/v1/ws`.  
+**Einziger Event-Envelope:** gemaess Zielarchitektur.  
+Noch keine fachlichen Events, Auth oder Persistenz.
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M01.  
-**Ziel:** unveraenderliche Textnachricht mit Serverzeitpunkt.  
-**Tests:** Insert/Read, kein Update-/Delete-Pfad, Transaktionsfehler.  
-**Green Gate:** oeffentliche API bietet keine Bearbeitungs- oder Loeschoperation.
+## 7. STAGE-04 – Geraete, Admin, Nutzer, Sitzungen und Presence
 
-### M03 – Senden mit Idempotenz-ID
+### D01 – Lokale Geraeteidentitaet
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M02.  
-**Ziel:** Send-Command mit `client_message_id` und serverseitiger Duplikatvermeidung.  
-**Tests:** Wiederholung, konkurrierende Wiederholung, unberechtigter Sender, ungueltiger Empfaenger.  
-**Green Gate:** identische Client-ID erzeugt genau eine Nachricht.
+**Owner Desktop:** `alarmcast/devices` und `alarmcast/settings`.  
+**Modell:** UUID + Windows-Hostname + DPAPI-geschuetztes Geraetetoken.  
+**Nicht anlegen:** MAC-basierte ID, Registry als zweite Wahrheit, Maschinenfingerprint.
 
-### M04 – Echtzeitzustellung
+### D02 – Serverseitige Geraeteregistrierung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M03, S02.  
-**Ziel:** neue Nachrichten an aktive berechtigte Clients ausliefern.  
-**Tests:** online, offline, Reconnect, mehrere Teilnehmer, keine Fremdzustellung.  
-**Green Gate:** Persistenz ist erfolgreich, auch wenn Live-Zustellung scheitert.
+**Owner Server:** `alarmcast_server/devices`.  
+**Tabellen:** nur `devices`, `device_capabilities` nach Domainmodell.  
+**Routes:** unter `/api/v1/devices`; keine generischen CRUD-Routes.
 
-### M05 – Zustellungsstatus
+### D03 – Heartbeat und DevicePresence
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M04.  
-**Ziel:** `SENT` und `DELIVERED` getrennt pro Ziel fuehren.  
-**Tests:** offline, mehrfacher Clientversuch, Wiederholung, Gruppenfanout.  
-**Green Gate:** Statusaenderungen veraendern die Nachricht nicht.
+**Owner:** Server `devices/presence`, Desktop `devices`.  
+**Keine Presence-Tabelle:** Status wird abgeleitet und `last_seen_at` aktualisiert.
 
-### M06 – Lesebestaetigung
+### D04 – AdminAccount
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M05.  
-**Ziel:** Chat-Oeffnung markiert alle bis dahin vorliegenden Nachrichten gelesen.  
-**Tests:** Einzelchat, Gruppe, bereits gelesen, spaeter eintreffende Nachricht, unberechtigter Leser.  
-**Green Gate:** Gruppenleserliste enthaelt Nutzer und Zeit, keine Geraete.
+**Owner:** `alarmcast_server/administration`.  
+**Tabelle:** `admin_accounts`.  
+**Freigegebene Dependency:** `argon2-cffi`.  
+**Nicht:** `is_admin` an User, Admin als GroupMember, Admin-Chat-API.
 
-### M07 – Dauerhafter Einzelchat
+### D05 – User und UserCapabilities
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M06.  
-**Ziel:** genau eine Conversation pro Nutzerpaar.  
-**Tests:** Reihenfolge der Nutzer, konkurrierende Erstellung, Wiederverwendung.  
-**Green Gate:** parallele Einzelchats desselben Paars sind technisch verhindert.
+**Owner:** `alarmcast_server/identity`.  
+**Tabellen:** `users`, `user_capabilities`, `user_presence_preferences`.  
+**Keine Self-Signup-Route.**
 
-### M08 – Sieben-Tage-Ladung und Pagination
+### D06 – User-Login und opaque Token
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M07.  
-**Ziel:** initial letzte sieben Tage, aeltere Seiten stabil nachladen.  
-**Tests:** Grenzzeitpunkt, gleiche Zeitstempel, leere Seite, keine Duplikate/Luecken.  
-**Green Gate:** sortierte Pagination ist deterministisch.
+**Owner:** `alarmcast_server/sessions`, Desktop `identity`.  
+**Tabelle:** `user_sessions`.  
+**Kein JWT.**
 
-### M09 – Lokaler Chatcache
+### D07 – Exklusive Session
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M08.  
-**Ziel:** geladene Unterhaltungen nach Serverausfall lesbar halten.  
-**Tests:** Neustart, Cache-Migration, Beschädigung, Berechtigungswechsel.  
-**Green Gate:** Cache ist nicht die serverseitige Wahrheitsquelle.
+Partielle Unique-Indizes fuer aktive Session pro User und Device. Neue Anmeldung widerruft alte Session atomar und sendet `session.revoked`.
 
-### M10 – Persistente Offline-Ausgangswarteschlange
+### D08 – UserPresence
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M03, M09.  
-**Ziel:** lokale Queue mit Retry und sichtbarem Wartestatus.  
-**Tests:** Neustart, Verbindungsabbruch waehrend Sendung, Retry, permanent ungueltig, Reihenfolge.  
-**Green Gate:** kein Peer-to-Peer-Ersatzversand; keine Doppelanlage.
+Status exakt `OFFLINE/AVAILABLE/AWAY/DO_NOT_DISTURB`; keine zusaetzlichen Busy/Invisible-Statuswerte.
 
-### M11 – Geraetechat
+## 8. STAGE-05 – Messaging-Kern
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M06, D02.  
-**Ziel:** jeder Nutzer kann jedes registrierte Geraet anschreiben.  
-**Tests:** unbesetztes Geraet, spaetere Anmeldung, kompletter Verlauf, Antwort an urspruenglichen Nutzer.  
-**Green Gate:** Geraete-ACK und Nutzer-READ bleiben getrennt.
+### M01 – Conversation-Basis und Subtypen
 
-### M12 – Inline-Zitat und threadfaehige Referenz
+**Tabellen exakt:**
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M08.  
-**Ziel:** `reply_to_message_id` und `thread_root_message_id` ohne Thread-UI.  
-**Tests:** gueltige/fremde/fehlende Ursprungsnachricht, Archivhistorie.  
-**Green Gate:** Zitat verweist auf Original statt Textkopie als alleinige Wahrheit.
+- `conversations`,
+- `direct_conversations`,
+- `device_conversations`,
+- `group_conversations`.
+
+Noch keine `conversation_memberships`, Messages oder UI.
+
+### M02 – Append-only Message
+
+**Tabelle exakt:** `messages`.  
+**Keine Edit-/Delete-/Soft-Delete-Spalten.**  
+Conversation-Sequenz transaktional.
+
+### M03 – Idempotentes Senden
+
+Eindeutigkeit `(origin_device_id, client_message_id)`.  
+Persistenz vor Live-Zustellung.  
+Keine Server-Outbox oder Broker.
+
+### M04 – Live-Zustellung
+
+Nutzt den einzigen WebSocket-Hub. Reconnect-Synchronisation bleibt REST-basiert.
+
+### M05 – MessageDelivery
+
+**Tabelle exakt:** `message_deliveries`.  
+Status nur `PENDING/DELIVERED`; `SENT` ist abgeleitet.
+
+### M06 – ReadReceipt und DeviceAcknowledgement
+
+**Tabellen exakt:**
+
+- `message_read_receipts`,
+- `message_device_acknowledgements`.
+
+Kein generisches Notification-/Receipt-Modell.
+
+### M07 – Dauerhafter DirectConversation
+
+Genau ein normalisiertes Userpaar. Kein zweiter Chat und kein „neuen Einzelchat starten“ als neue Conversation.
+
+### M08 – Sieben-Tage-Abfrage und stabile Pagination
+
+Filter nach Serverzeit, Sortierung/Pagination nach `conversation_sequence`; nicht nur Timestamp-Cursor.
+
+### M09 – Einzige lokale SQLite-Datei und Cache
+
+**Datei:** `%APPDATA%\AlarmCast\client-state.sqlite3`.  
+**Tabellen:** exakt nach Domainmodell.  
+Keine JSON-Cachedateien.
+
+### M10 – Explizite Offline-Queues
+
+Tabellen `outbound_messages`, `pending_read_receipts`, `pending_device_acknowledgements`, `pending_reaction_changes`, `pending_alarmcast_log_events`. Kein generischer Command-Bus.
+
+### M11 – DeviceConversation-Zugriff
+
+Ein Devicechat pro Device. Vollverlauf nur am Zieldevice; externer Sender sieht eigene Device-Messages. Antwort an User erfolgt in DirectConversation.
+
+### M12 – Inline-Referenz und Thread-Wurzel
+
+Nur `reply_to_message_id` und `thread_root_message_id`; keine Thread-Tabelle und keine Thread-UI.
 
 ### M13 – Reaktionen
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M02.  
-**Ziel:** feste Reaktionen setzen, aendern und entfernen.  
-**Tests:** eine Reaktion pro Nutzer/Nachricht, Wechsel, Remove, Fremdzugriff.  
-**Green Gate:** Reaktion ist eigener Datensatz; Nachricht bleibt unveraendert.
+**Tabelle exakt:** `message_reactions`.  
+Feste `ReactionCode`; keine freien Emojis.
 
-## 8. Phase G – Gruppen
+## 9. STAGE-06 – Gruppen
 
-### G01 – Gruppenerstellung und private Sichtbarkeit
+### G01 – Private GroupConversation
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M01.  
-**Ziel:** jeder Nutzer kann eine private Gruppe erstellen und wird Eigentümer.  
-**Tests:** Nichtmitglied sieht Gruppe nicht; kein oeffentliches Listing.  
-**Green Gate:** Gruppe ist nur fuer Mitglieder auffindbar.
+Erstellt `group_conversations` plus erste `group_memberships`-Ownerzeile in einer Transaktion.
 
-### G02 – Gruppenrollen und Hinzufuegen
+### G02 – Rollen und Hinzufuegen
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G01.  
-**Ziel:** `GROUP_OWNER`, `GROUP_ADMIN`, `MEMBER` und Hinzufuegen nach Rechteprofil.  
-**Tests:** Rechte-Matrix inklusive negativer Faelle.  
-**Green Gate:** Hilfsadmin darf hinzufuegen, aber nicht entfernen.
+Rechtematrix exakt nach Domainmodell; keine UI-only-Pruefung.
 
 ### G03 – Entfernen und Adminverwaltung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G02.  
-**Ziel:** nur Eigentümer entfernt Mitglieder; Hilfsadmins verwalten innerhalb der freigegebenen Grenzen.  
-**Tests:** Eigentümer nicht durch Hilfsadmin entfernbar; Rollenwechsel.  
-**Green Gate:** serverseitige Autorisierung unabhaengig von UI.
+Nur Owner entfernt Mitglieder. Hilfsadmin darf keinen Owner oder Member entfernen.
 
-### G04 – Vollstaendige Historie fuer neue Mitglieder
+### G04 – Vollhistorie fuer neue Mitglieder
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G03, M08.  
-**Ziel:** neues Mitglied sieht gesamten bisherigen Verlauf.  
-**Tests:** Eintrittszeitpunkt, Pagination, Lesestatus startet korrekt.  
-**Green Gate:** historische Nachrichten werden nicht kopiert oder umgeschrieben.
+Keine Messagekopie und keine rueckwirkend erfundenen Delivery-Zeitpunkte.
 
 ### G05 – Kein Selbstaustritt
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G03.  
-**Ziel:** Selbstentfernung wird fachlich und API-seitig verhindert.  
-**Tests:** Member, Admin und Owner versuchen Austritt.  
-**Green Gate:** nur Eigentümeroperation oder Systemprozess kann Mitgliedschaft beenden.
+Keine Leave-Route und kein Leave-Button fuer Member/Admin/Owner.
 
-### G06 – Eigentuemlichkeit und Nutzerdeaktivierung
+### G06 – Eigentumsuebergabe vor Deaktivierung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G03, D05.  
-**Ziel:** Eigentümertransfer oder Archivierung vor Deaktivierung.  
-**Tests:** aktive Gruppen blockieren Deaktivierung; Transfer; mehrere Gruppen; Rennen.  
-**Green Gate:** keine aktive Gruppe ohne aktiven Eigentümer.
+Genau ein aktiver Owner. Deaktivierung blockiert bis Transfer oder Archivierung.
 
 ### G07 – Gruppenarchivierung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G06.  
-**Ziel:** read-only Archiv statt Loeschung.  
-**Tests:** Schreiben verweigert, Lesen/Suche erlaubt, Reaktivierung mit neuem Eigentümer.  
-**Green Gate:** kein physischer Delete-Pfad fuer Gruppe oder Verlauf.
+`ACTIVE -> ARCHIVED`, read-only, kein Delete. Reaktivierung nur Adminprozess mit aktivem Owner.
 
-### G08 – Systemadmin-Metadatenansicht
+### G08 – Admin-Metadatenansicht
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** G07, D04.  
-**Ziel:** verwaiste Gruppen verwalten, ohne Nachrichteninhalt anzuzeigen.  
-**Tests:** Metadaten erlaubt; Nachrichten, Screenshots und Suche verweigert.  
-**Green Gate:** Admin-API serialisiert keine Content-Felder.
+Admin sieht Gruppenname, Rollen, Mitglieder, Zeiten und Status; keine Message-/Screenshotfelder und keine inhaltliche Suche.
 
-## 9. Phase U – Desktop-Messaging-Oberflaeche
+## 10. STAGE-07 – Desktop-Messaging
 
-### U01 – App-Shell-Navigation und eigener Status
+### U01 – Shell-Navigation und eigener Status
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A06, D08.  
-**Ziel:** klassische Messenger-Grundstruktur mit eigenem Nutzer- und Rechnerstatus.  
-**Tests:** ViewModel/Controller ohne echte GUI; Startupzustand.  
-**Windows-Smoke:** Tray und Hauptfenster.  
-**Green Gate:** UI enthaelt keine direkte Netzwerk- oder Persistenzlogik.
+Erweitert ausschliesslich bestehende `app_shell`; kein zweites Hauptfensterframework.
 
 ### U02 – Kontakt- und Geraeteliste
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U01, D03, D08.  
-**Ziel:** Nutzer nach sinnvoller Presence und Geraete nach Status gruppieren.  
-**Tests:** Sortierung, Statuswechsel, Offline, unbesetzt.  
-**Green Gate:** kein veralteter Status ohne sichtbare Kennzeichnung.
+ViewModel liest nur typisierte Contracts. Keine eigene Presenceberechnung in Widgets.
 
-### U03 – Einzelchat-Oberflaeche
+### U03 – DirectChat-UI
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U02, M08.  
-**Ziel:** Chatfenster, sieben Tage, Nachladen, Sendestatus und Lesen.  
-**Tests:** Presenter/ViewModel; Scroll-Pagination; Fehlerstatus.  
-**Windows-Smoke:** reale Qt-Bedienung.  
-**Green Gate:** kein Edit-/Delete-Menue fuer gesendete Nachrichten.
+Kein Edit/Delete/Recall. Sieben Tage initial, aeltere Sequenzen nachladen.
 
-### U04 – Geraetechat-Oberflaeche
+### U04 – DeviceChat-UI
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U03, M11.  
-**Ziel:** Rechner als direktes Ziel und sichtbare ACK-/READ-Unterscheidung.  
-**Tests:** unbesetzter/belegter Rechner, Antwortziel.  
-**Green Gate:** vollstaendiger Geraeteverlauf ist am Geraet sichtbar.
+Vollverlauf nur auf Zieldevice; externer Senderbereich darf fremde Device-Messages nicht anzeigen.
 
-### U05 – Gruppenoberflaeche
+### U05 – GroupChat-UI
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U03, G07.  
-**Ziel:** Gruppe erstellen, Mitglieder/Rollen verwalten, archivierte Gruppe read-only.  
-**Tests:** UI-Aktionen nach Rechte-Matrix.  
-**Green Gate:** ausgeblendete UI ersetzt nicht serverseitige Autorisierung.
+Rechtebasierte Aktionen; Server bleibt Autoritaet. Archivgruppe read-only.
 
-### U06 – Inline-Zitat und Reaktionsoberflaeche
+### U06 – Inline-Zitat und Reaktion
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U03, M12, M13.  
-**Ziel:** Zitatnavigation und feste Reaktionen.  
-**Tests:** Originalsprung, nicht geladene Historie, Reaktionsliste.  
-**Green Gate:** keine sichtbare Thread-Oberflaeche.
+Keine sichtbare Threadansicht. Keine freien Emoji-Picker.
 
-### U07 – Screenshot aus Zwischenablage
+### U07 – Screenshot aus Windows-Zwischenablage
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U03.  
-**Ziel:** Windows-Zwischenablagebild mit Vorschau senden.  
-**Scope:** kein Dateidialog und kein allgemeiner Upload.  
-**Tests:** Bild vorhanden/nicht vorhanden, Abbruch, Groessenlimit nach ADR.  
-**Windows-Smoke:** `Win+Shift+S` → Einfuegen → Versand.  
-**Green Gate:** nur Bilddaten aus der Zwischenablage werden akzeptiert.
+Nur Clipboard-Image, kein Dateidialog. Vorschau vor Versand. Noch kein Server-Archiv.
 
-## 10. Phase N – Screenshots, Suche und Dringlichkeit
+## 11. STAGE-08 – Screenshots, Suche und Dringlichkeit
 
-### N01 – Serverseitiger Screenshot-Speicher
+### N01 – Screenshot-Speicher
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** U07, S03.  
-**Ziel:** transaktionale Metadaten, Pruefsumme und verwalteter Dateispeicher.  
-**Tests:** Upload, Abbruch, Duplikat, unberechtigter Abruf, verwaiste Datei.  
-**Green Gate:** Binaerdaten liegen nicht als grosse Felder in der Nachrichtentabelle.
+**Tabelle:** `screenshot_attachments`.  
+Binaerdatei ausserhalb DB, SHA-256 und Dimensionen. Kein Base64 in Message/WebSocket.
 
-### N02 – Berechtigte Suche und Archivindex
+### N02 – PostgreSQL-Suche
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M08, G07, N01.  
-**Ziel:** Text-, Nutzer-, Gruppen-, Geraete-, Datums- und Screenshotfilter.  
-**Tests:** eigene/fremde Inhalte, archivierte Gruppe, Sonderzeichen, Pagination.  
-**Green Gate:** Systemadmin erhaelt keine inhaltliche Fremdsuche.
+PostgreSQL-Volltext, serverseitige Zugriffsfilter. Kein Elasticsearch und keine zweite Suchdatenbank.
 
-### N03 – Dringlichkeitsmodell und drei Vorschaumodi
+### N03 – Urgency und DisplayMode
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** M03.  
-**Ziel:** `FULL`, `PREVIEW`, `HIDDEN` als unveraenderliche Nachrichteneigenschaft.  
-**Tests:** Validierung, User/Device/Group, Rechte, Serialisierung.  
-**Green Gate:** verdeckte Nachricht liefert dem Overlay keinen Inhaltstext.
+Nur Felder in `messages`: `urgency`, `urgent_display_mode`. Keine `urgent_messages`-Tabelle.
 
-### N04 – Persistenter Dringlichkeitsstatus
+### N04 – Persistenter Urgent-Status
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** N03, M06.  
-**Ziel:** offen, geoeffnet, gelesen/bestaetigt getrennt pro Empfaenger.  
-**Tests:** Volltext, Vorschau, verdeckt, mehrere Sitzungswechsel, Geraete-ACK.  
-**Green Gate:** verdeckte Nachricht kann vor Oeffnen nicht als gelesen bestaetigt werden.
+Abgeleitet aus ReadReceipt/DeviceAcknowledgement. Keine parallele Notification-State-Tabelle.
 
-### N05 – Dringliches Multi-Monitor-Overlay
+### N05 – Rand-Overlay auf allen Monitoren
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A05, N04.  
-**Ziel:** persistente Windows-aehnliche Stapel am Bildschirmrand auf allen Monitoren.  
-**Tests:** Layoutberechnung, Stapel, Ueberlauf, getrenntes Clear.  
-**Windows-Smoke:** mehrere Monitore; Overlay bleibt im Vordergrund und verschwindet nicht automatisch.  
-**Green Gate:** Alarmcast-Mitte bleibt unverdeckt.
+Erweitert einzigen OverlayCoordinator um `URGENT_MESSAGE`. Alarmcast-Mitte bleibt frei.
 
-### N06 – Overlay-Aktionen und Chatnavigation
+### N06 – Aktionen Oeffnen/Gelesen
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** N05, U03, U04, U05.  
-**Ziel:** `Oeffnen` und je nach Modus `Gelesen` korrekt ausfuehren.  
-**Tests:** Zielchat, archivierter Chat, verdeckt, Gruppenlesestatus.  
-**Green Gate:** Aktion ist idempotent und serverseitig autorisiert.
+HIDDEN nur Oeffnen. Aktionen idempotent und autorisiert.
 
-## 11. Phase I – Vollstaendige Alarmcast-Integration
+## 12. STAGE-09 – Alarmcast-Gesamtintegration
 
-### I01 – Mehrere Alarmquellen und Zuordnungen
+### I01 – Mehrquellen-Zuordnung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** A04, D02.  
-**Ziel:** ein Ueberwacher kann mehreren Quellen zugeordnet sein; Standard eine.  
-**Tests:** Zuordnung, Entfernen, zwei gleichzeitige Alarme, reconnect je Quelle.  
-**Green Gate:** Alarmereignis enthaelt eindeutige Quelle.
+**Tabelle:** `alarm_monitor_assignments`.  
+Keine `default_source_id`-Parallelwahrheit.
 
-### I02 – Lokale Alarmcast-Berechtigungspruefung
+### I02 – Lokale Capability-Pruefung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** I01, D07.  
-**Ziel:** Start/Stop/Reset/Configure nach Nutzer- oder Geraetecapability.  
-**Tests:** vollstaendige Rechte-Matrix; kein Nutzer; privilegiertes Konto ohne Passwort.  
-**Green Gate:** Start/Stop bleibt lokal; keine Fernsteuerungs-API.
+Exakte User-/DeviceCapabilities. Start/Stop/Configure nicht als Fernsteuerungsroute.
 
-### I03 – Zentraler Alarmereignis- und Reset-Log
+### I03 – AlarmEvent, AlarmReset und LogSync
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** I02, S03.  
-**Ziel:** Quelle, Alarm-ID, Zeiten, Reset-Geraet, Reset-Nutzer und Berechtigungsart zentral speichern.  
-**Tests:** online, offline gepuffert, Wiederholung, Reihenfolge.  
-**Green Gate:** kein Audiostream wird zentral gespeichert.
+**Tabellen exakt:** `alarm_events`, `alarm_resets`, `alarmcast_log_events`.  
+Kein Audiostream und keine generische All-Events-Tabelle.
 
-### I04 – Persistente Ausfallwarnung
+### I04 – Persistente MonitoringFailure
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** I01, A05.  
-**Ziel:** nicht erreichbare Quelle, Audio-/Outputfehler und gestopptes Modul dauerhaft anzeigen.  
-**Tests:** Fehlerarten, Wiederherstellung, DND, mehrere Quellen.  
-**Windows-Smoke:** echte Netzwerk- und Audioausfaelle.  
-**Green Gate:** Warnung ist visuell vom Analysealarm unterscheidbar.
+Ein Overlaytyp im Koordinator; Quelle/Fehlerart eindeutig. DND unterdrueckt nicht.
 
-### I05 – Parallele Alarm- und Dringlichkeitsanzeige
+### I05 – Parallele Alarm-/Urgent-Anzeige
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** I04, N06.  
-**Ziel:** zentraler Alarm und Randnachrichten gleichzeitig, getrennte Bestaetigung.  
-**Tests:** Prioritaet, Z-Order, Clear eines Typs, mehrere Monitore.  
-**Green Gate:** keiner der beiden Typen entfernt oder bestaetigt den anderen.
+Getrennte Z-Order, Lifecycle und Bestaetigung. Kein gegenseitiges Clear.
 
-### I06 – Migration vorhandener Alarmcast-Einstellungen
+### I06 – Migration alter Alarmcast-Einstellungen
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** B03, A06, I02.  
-**Ziel:** `host.json`, `client.json`, `mode.txt`, Autostart und Audioeinstellungen in gemeinsames Profil uebernehmen.  
-**Tests:** Host, Client, beide, unvollstaendig, wiederholte Migration, Rollback.  
-**Windows-Smoke:** reale vorhandene Konfiguration.  
-**Green Gate:** Quelldateien werden nicht ungefragt geloescht; Migration laeuft nur einmal.
+Migriert `host.json`, `client.json`, `mode.txt` in kanonisches Settingsmodell. Quelldateien bleiben bis verifizierter erfolgreicher Migration erhalten.
 
-## 12. Phase O – Archiv, Backup und Betrieb
+## 13. STAGE-10 – Archiv, Backup und Windows-Betrieb
 
 ### O01 – Screenshot-Archivierung
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** N01, N02.  
-**Ziel:** aeltere Screenshots nach konfigurierbarer Frist in separaten Archivspeicher verschieben.  
-**Tests:** Standard 12 Monate, Grenzdatum, Abruf, Ausfall, Wiederholung.  
-**Green Gate:** Nachricht und Suchmetadaten bleiben aktiv; keine automatische Loeschung.
+Nur `ScreenshotStorageTier ACTIVE -> ARCHIVE`; Message und Suchmetadaten bleiben.
 
 ### O02 – Konsistenter Backup-Satz
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** O01, I03.  
-**Ziel:** Datenbank, Screenshots, Archivindex, Logs und Konfiguration konsistent auf Netzlaufwerk sichern.  
-**Tests:** Erfolg, nicht erreichbares Netzlaufwerk, Teilausfall, atomare Gueltigmarkierung.  
-**Green Gate:** unvollstaendiges Backup wird nicht als restore-faehig angeboten.
+`pg_dump` Custom Format + Dateispeicher + Manifest auf UNC-Netzlaufwerk. Tempverzeichnis bis Validierung.
 
-### O03 – Backuprotation
+### O03 – Rotation
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** O02.  
-**Ziel:** anpassbare Standardrotation 7 taeglich, 4 woechentlich, 12 monatlich.  
-**Tests:** Zeitgrenzen, Monatswechsel, zu schützende letzte gueltige Sicherung.  
-**Green Gate:** Rotation loescht nie den einzigen gueltigen Sicherungssatz.
+Standard 7 taeglich / 4 woechentlich / 12 monatlich, administrativ anpassbar. Nie einzigen gueltigen Satz loeschen.
 
-### O04 – Integritaetspruefung und Restore-Werkzeug
+### O04 – Integritaet und Restore
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** O03.  
-**Ziel:** automatischer Integritaetscheck und dokumentierter Restore in leere Zielumgebung.  
-**Tests:** valides/defektes Backup, Versionsmigration, Dateipruefsummen.  
-**Windows-Smoke:** vollstaendiger Restore-Test.  
-**Green Gate:** wiederhergestellte Daten bestehen definierte Konsistenzabfragen.
+Separater Betriebscommand im **Server-Entry-Point-Konzept**, kein dritter Produktentrypoint. Falls CLI-Subcommand erforderlich, wird er unter `python -m alarmcast_server restore` eingefuehrt.
 
-### O05 – Windows-Server-Dienst
+### O05 – Windows-Dienst
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** S02, O04.  
-**Ziel:** Server automatisch und kontrolliert unter Windows betreiben.  
-**Tests:** Installation, Start, Stop, Neustart, Dienstkonto, Netzlaufwerkszugriff.  
-**Green Gate:** keine interaktive Benutzeranmeldung fuer Dauerbetrieb erforderlich.
+`pywin32`, genau ein Serverdienst. Kein NSSM/WinSW als zweite offizielle Betriebsart.
 
-### O06 – Desktop-Build, Autostart und Installation
+### O06 – Desktop-Build und Installer
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** I06, N06.  
-**Ziel:** reproduzierbare Desktop-EXE und dokumentierte Verteilung.  
-**Tests:** PyInstaller, Upgrade ueber Bestandsversion, Autostart, Settings-Erhalt.  
-**Green Gate:** Neuinstallation und Upgrade sind getrennt getestet.
+PyInstaller + Inno Setup. Manueller/administrativer Updateprozess Version 1; kein selbst erfundener Auto-Updater.
 
-## 13. Phase R – Systemabnahme
+## 14. STAGE-11 – Systemabnahme
 
-### R01 – Mehrclient-End-to-End-Test
+### R01 – Mehrclient-E2E
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** O05, O06.  
-**Ziel:** Server, zwei Nutzerclients, Geraetechat, Gruppe, Offline-Queue und Alarmcast gemeinsam testen.  
-**Tests:** festes E2E-Drehbuch mit beobachtbaren Ergebnissen.  
-**Green Gate:** alle Kernablaeufe ohne direkte Datenbankmanipulation erfolgreich.
+Server, zwei Userdevices, ein unbesetztes Device, Direct/Group/Device, Offline-Queue, Urgent, Alarmcast.
 
-### R02 – Ausfall- und Wiederanlauftest
+### R02 – Ausfall und Wiederanlauf
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** R01.  
-**Ziel:** Serverausfall, Netzunterbrechung, Clientabsturz, Alarmquelle offline, Netzlaufwerk offline.  
-**Green Gate:** Alarmcast bleibt direkt funktionsfaehig; Messaging synchronisiert ohne Doppelungen.
+Server, Netzwerk, Clientprozess, Alarmquelle, Audiooutput, Netzlaufwerk. Keine Doppelmessages nach Recovery.
 
-### R03 – Abnahme gegen Spezifikation 1.0
+### R03 – Traceability gegen Spezifikation
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** R02.  
-**Ziel:** tracebare Abnahmematrix fuer jeden Spezifikationsabschnitt.  
-**Green Gate:** jede Anforderung besitzt Testbeleg oder dokumentierte manuelle Abnahme; keine offene kritische Abweichung.
+Jeder Spezifikationsabschnitt -> Inkrement -> automatisierter Test -> manueller Test -> Ergebnis.
 
 ### R04 – Release Candidate
 
-**Status:** `PLANNED`  
-**Abhaengigkeit:** R03.  
-**Ziel:** versionierter Release Candidate, Release Notes, Installations- und Restore-Dokumentation.  
-**Green Gate:** nur freigegebene Artefakte; kein neues Feature in diesem Inkrement.
+Versionierte Artefakte, Release Notes, Installations-, Backup- und Restore-Dokumentation. Kein neues Feature.
 
-## 14. Freigabe des jeweils naechsten Inkrements
+## 15. Stop- und Reviewregeln
 
-Nach Merge eines Inkrements:
+Codex stoppt innerhalb einer Etappe bei allen `AGENTS.md`-Stop-Bedingungen, insbesondere wenn:
 
-1. PR und Green Gate werden extern beziehungsweise durch einen zweiten Agent geprueft.
-2. Roadmap-Status wird auf `DONE` gesetzt.
-3. Die naechste detaillierte Inkrementdatei wird erstellt oder aktualisiert.
-4. Genau dieses Inkrement wird auf `READY` gesetzt.
-5. `tasks/ACTIVE_TASK.md` wird angepasst.
-6. Erst danach wird ein neuer Codex-Task gestartet.
+- ein nicht gelistetes Modul oder eine nicht gelistete Tabelle erforderlich erscheint,
+- eine neue Dependency ausserhalb des Inkrements erforderlich ist,
+- ein manuelles Hardwaregate fachliche Grundlage des naechsten Inkrements ist,
+- ein Test nach zwei zielgerichteten Reparaturversuchen nicht gruen wird,
+- bestehendes Alarmcast-Verhalten nicht bewahrt werden kann.
+
+Nach Etappenabschluss:
+
+1. `tasks/ACTIVE_STAGE.md` auf `REVIEW` setzen,
+2. Draft-PR gegen den dort genannten Zielbranch,
+3. keine Folgeetappe aktivieren,
+4. Lauf beenden.
