@@ -1,5 +1,5 @@
 ---
-description: Verbindlicher inkrementeller Arbeitsablauf fuer alle schreibenden KI-Agents
+description: Verbindlicher autonomer Stage-Workflow und Anti-Erfindungsregeln fuer Cursor/Codex
 globs:
   - "**/*"
 alwaysApply: true
@@ -7,15 +7,18 @@ alwaysApply: true
 
 # Verbindlicher Agent-Workflow
 
-1. Lies vor jeder Aenderung `AGENTS.md`.
-2. Bearbeite ausschliesslich den Task aus `tasks/ACTIVE_TASK.md`.
-3. Ist dieser Task nicht mit `READY` markiert, darfst du keine Datei aendern.
-4. Lies die dort verlinkte Inkrementdatei vollstaendig.
-5. Fuehre vor dem ersten Edit die Baseline-Pruefungen aus.
-6. Aendere nichts ausserhalb des ausdruecklichen Scopes.
-7. Beginne niemals eigenstaendig den naechsten Roadmap-Punkt.
-8. Fuehre alle taskbezogenen Tests und das Green Gate aus.
-9. Dokumentiere nicht ausgefuehrte Tests ehrlich als `NOT RUN`.
-10. Beende die Arbeit mit einem Draft-PR und dem Abschlussbericht aus `AGENTS.md`.
+1. Lies vor jeder Aenderung `AGENTS.md` vollstaendig.
+2. Die einzige Arbeitsfreigabe steht in `tasks/ACTIVE_STAGE.md`.
+3. Arbeite nur auf dem dort genannten Branch und nur an den dort gelisteten Inkrementen.
+4. Lies `docs/domain-model.md` und `docs/target-architecture.md`, bevor du neue Dateien, Typen, Tabellen, Routen oder Contracts anlegst.
+5. Suche vor jeder Neuanlage nach vorhandenem Symbol, Synonym, Owner und Test. Erfinde keine Parallelstruktur.
+6. Lege keine `utils`, `helpers`, `common`, `shared`, `manager`, generischen `services/repositories/models/schemas` oder zusaetzlichen Entry Points an.
+7. Verwende nur kanonische Entitaets-, Tabellen-, Modul-, Enum- und API-Namen.
+8. Keine leeren Zukunftsmodule, TODO-Scaffolds, zweiten Implementierungen oder Compatibility-Wrapper.
+9. Aendere nur die in der aktuellen Inkrementdatei erlaubten Produktmodule.
+10. Fuehre Baseline, taskbezogene Tests und das vollstaendige Green Gate aus.
+11. Bei `AUTO_GREEN`: genau einen Inkrementcommit erstellen und zum naechsten Inkrement derselben Stage wechseln.
+12. Bei Stop-Bedingung: sofort anhalten; keine Tests abschwaechen und keinen Workaround ausserhalb des Scopes bauen.
+13. Nach dem letzten Stage-Inkrement: Draft-PR, Bericht, STOP. Keine Folgeetappe aktivieren oder beginnen.
 
-Bei Widerspruch, neuer Top-Level-Abhaengigkeit, notwendiger Architekturentscheidung oder Gefahr fuer bestehende Alarmcast-Funktionen: stoppen und konkret nachfragen.
+Besonders verboten: neue Top-Level-Dependency, zweiter Netzwerkstack, zweite Datenbank, zweiter Composition Root, generische JSONB-Kerndomaene, Message-Edit/Delete, direkte GUI-Datenbank-/Socketzugriffe und Admin-Chatinhalt-API.
