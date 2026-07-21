@@ -132,14 +132,14 @@ Sofort stoppen bei:
 Bei erfuelltem Gate:
 
 1. `docs/baseline-report.md` fertigstellen.
-2. Genau einen Commit erstellen:
+2. `docs/stage-reports/STAGE-01.md` anlegen und den B00-Checkpoint eintragen.
+3. Genau einen Commit erstellen:
 
 ```text
 B00 Import original Alarmcast baseline
 ```
 
-3. Checkpoint in `tasks/stages/STAGE-01-baseline-and-guards.md` eintragen.
-4. Status `AUTO_GREEN` beziehungsweise den erlaubten Baseline-Sonderstatus dokumentieren.
+4. Status `AUTO_GREEN` beziehungsweise den in der Etappendatei erlaubten Baseline-Sonderstatus dokumentieren.
 5. Direkt mit B01 derselben Etappe fortfahren.
 
 Nach B00 keinen Pull Request erstellen und keine Arbeit ausserhalb von STAGE-01 beginnen.
