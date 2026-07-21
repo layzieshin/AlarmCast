@@ -1,7 +1,7 @@
 # B00 – Originalen Alarmcast-Bestand importieren
 
-**Status:** `BLOCKED`  
-**Freigabevoraussetzung:** Die Datei `bootstrap/alarmcast-baseline.zip` wurde vom Projekteigner hochgeladen und ihre SHA-256-Pruefsumme wurde in `tasks/ACTIVE_TASK.md` eingetragen.  
+**Status:** `READY`  
+**Freigabegrund:** `bootstrap/alarmcast-baseline.zip` wurde gegen die urspruengliche Alarmcast-Datei verifiziert.  
 **Art:** Repository-Baseline, keine Produktentwicklung.
 
 ## 1. Ziel
@@ -24,7 +24,7 @@ Unter Windows darf statt `sha256sum` verwendet werden:
 Get-FileHash bootstrap\alarmcast-baseline.zip -Algorithm SHA256
 ```
 
-Stimmt die Pruefsumme nicht exakt mit `tasks/ACTIVE_TASK.md` ueberein: sofort stoppen.
+Erwartete Werte stehen in `tasks/ACTIVE_TASK.md`. Bei jeder Abweichung sofort stoppen.
 
 ## 3. In Scope
 
