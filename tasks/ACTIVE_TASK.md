@@ -2,9 +2,9 @@
 
 ## Status
 
-`BLOCKED`
+`READY`
 
-## Vorgesehenes Inkrement
+## Freigegebenes Inkrement
 
 `B00 – Originalen Alarmcast-Bestand importieren`
 
@@ -12,40 +12,44 @@ Vollstaendige Anweisung:
 
 - `tasks/increments/B00-import-baseline.md`
 
-## Blocker
+## Verifizierte Baseline-Datei
 
-Die originale Projektdatei muss nach Merge dieses Planungs-PRs als
+Pfad:
 
 ```text
 bootstrap/alarmcast-baseline.zip
 ```
 
-auf einem neuen Arbeitsbranch bereitgestellt werden.
-
-Erwartete SHA-256-Pruefsumme:
+SHA-256:
 
 ```text
 879e12eacbc7102b45952069c5582d456b55d4cfa12d3f55ea9e77e77334b99e
 ```
 
-Erwartete Archivgroesse:
+Dateigroesse:
 
 ```text
 80584 Bytes
 ```
 
-Der Task darf erst auf `READY` gesetzt werden, nachdem Pfad, Dateigroesse und SHA-256 im Repository geprueft wurden.
-
-## Startprompt nach Freigabe
+Git-Blob-SHA:
 
 ```text
-Arbeite im Repository layzieshin/AlarmCast.
-
-Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente.
-Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task.
-Beginne keine spaeteren Roadmap-Punkte.
-Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
-Oeffne danach einen Draft-Pull-Request und beende den Task.
+0d544aded3af0513d344273db5f0e2fa564cd460
 ```
 
-Solange der Status `BLOCKED` ist, darf Codex keine Dateien aendern.
+Pfad, Dateigroesse und Dateiinhalt wurden gegen die urspruenglich bereitgestellte Alarmcast-ZIP verifiziert.
+
+## Startprompt
+
+```text
+Arbeite im Repository layzieshin/AlarmCast auf dem Branch agent/B00-import-baseline.
+
+Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente.
+Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B00.
+Beginne keine spaeteren Roadmap-Punkte.
+Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
+Oeffne danach einen Draft-Pull-Request gegen main und beende den Task.
+```
+
+Codex darf nach Abschluss von B00 weder B01 beginnen noch einen weiteren Roadmap-Status veraendern.
