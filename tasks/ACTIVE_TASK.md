@@ -2,7 +2,7 @@
 
 ## Status
 
-`BLOCKED`
+`READY`
 
 ## Vorgesehenes Inkrement
 
@@ -12,15 +12,12 @@ Vollstaendige Anweisung:
 
 - `tasks/increments/B00-import-baseline.md`
 
-## Blocker
+## Freigabepruefung
 
-Die originale Projektdatei muss nach Merge dieses Planungs-PRs als
+Die originale Projektdatei wurde auf dem Arbeitsbranch als
+`bootstrap/alarmcast-baseline.zip` bereitgestellt.
 
-```text
-bootstrap/alarmcast-baseline.zip
-```
-
-auf einem neuen Arbeitsbranch bereitgestellt werden.
+Pfad, Dateigroesse und SHA-256-Pruefsumme wurden geprueft und stimmen mit den erwarteten Werten ueberein.
 
 Erwartete SHA-256-Pruefsumme:
 
@@ -34,7 +31,7 @@ Erwartete Archivgroesse:
 80584 Bytes
 ```
 
-Der Task darf erst auf `READY` gesetzt werden, nachdem Pfad, Dateigroesse und SHA-256 im Repository geprueft wurden.
+Der Task ist nach erfolgreicher Pruefung von Pfad, Dateigroesse und SHA-256 fuer die Ausfuehrung freigegeben.
 
 ## Startprompt nach Freigabe
 
@@ -48,4 +45,4 @@ Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
 Oeffne danach einen Draft-Pull-Request und beende den Task.
 ```
 
-Solange der Status `BLOCKED` ist, darf Codex keine Dateien aendern.
+Codex darf ausschliesslich den freigegebenen Task B00 bearbeiten.
