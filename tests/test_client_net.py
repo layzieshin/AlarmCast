@@ -27,6 +27,6 @@ def test_build_hello_payload_format() -> None:
 
 
 def test_host_endpoint_dataclass() -> None:
-    ep = HostEndpoint(host="10.0.0.5", port=50050)
-    assert ep.host == "10.0.0.5"
+    ep = HostEndpoint(host="192.0.2.5", port=50050)
+    assert ep.host == "192.0.2.5"
     assert ep.port == 50050

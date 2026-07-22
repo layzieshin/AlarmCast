@@ -44,12 +44,11 @@ Der Guard meldet:
 - typische Credential- und Private-Key-Dateien,
 - Private-Key-Header in Textinhalten,
 - GitHub-Tokens mit bekannten produktiven Praefixen,
-- RFC1918-Adressen ausserhalb offensichtlich fiktiver Testdaten unter `tests/`.
+- RFC1918-Adressen in allen gescannten Textdateien, einschliesslich Dateien unter `tests/`.
 
-Die Ausnahme fuer Testdaten gilt nur fuer RFC1918-Inhalte. Credential-Dateien, Private-Key-Header
-und Tokenmuster bleiben auch unter `tests/` verboten. Loopback-, Bind- und Multicast-Adressen sowie
-die offiziellen Dokumentationsnetze sind erlaubt. Die drei RFC1918-Netzdefinitionen mit ihrem
-Standard-CIDR duerfen zu Dokumentationszwecken genannt werden.
+Loopback-, Bind- und Multicast-Adressen sowie die offiziellen Dokumentationsnetze sind erlaubt.
+Testfixtures verwenden diese Dokumentationsnetze statt privater Adressen. Die drei
+RFC1918-Netzdefinitionen mit ihrem Standard-CIDR duerfen zu Dokumentationszwecken genannt werden.
 
 ## Lokal ausfuehren
 

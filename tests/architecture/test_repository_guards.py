@@ -111,11 +111,28 @@ def test_rfc1918_product_addresses_fail(tmp_path: Path, first: str, remainder: s
     assert address in message
 
 
-def test_obvious_test_fixture_rfc1918_address_passes(tmp_path: Path) -> None:
-    fixture_address = "10" + ".0.0.5"
-    fixture = _write(tmp_path, "tests/test_network.py", f'HOST = "{fixture_address}"\n')
+def test_documentation_addresses_in_test_file_pass(tmp_path: Path) -> None:
+    fixture = _write(
+        tmp_path,
+        "tests/test_network.py",
+        'HOSTS = ("192.0.2.5", "198.51.100.8", "203.0.113.9")\n',
+    )
 
     assert check_repository_safety(tmp_path, [fixture]) == []
+
+
+def test_rfc1918_address_in_test_file_fails(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    fixture_address = "10" + ".0.0.5"
+    _write(tmp_path, "tests/test_network.py", f'HOST = "{fixture_address}"\n')
+    subprocess.run(["git", "add", "tests/test_network.py"], cwd=tmp_path, check=True)
+
+    violations = check_repository_safety(tmp_path)
+
+    message = format_violations(violations)
+    assert "tests/test_network.py:1" in message
+    assert "rfc1918-address" in message
+    assert fixture_address in message
 
 
 def test_git_file_listing_includes_tracked_and_nonignored_untracked(tmp_path: Path) -> None:

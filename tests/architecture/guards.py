@@ -31,9 +31,7 @@ _PRIVATE_NETWORKS = (
     ipaddress.ip_network("192.168.0.0/16"),
 )
 _PRIVATE_RANGE_DEFINITIONS = {
-    "10.0.0.0": "/8",
-    "172.16.0.0": "/12",
-    "192.168.0.0": "/16",
+    str(network.network_address): f"/{network.prefixlen}" for network in _PRIVATE_NETWORKS
 }
 
 
@@ -415,32 +413,26 @@ def _content_violations(relative: str, text: str) -> list[GuardViolation]:
                 detail=f"GitHub token with prefix {match.group(0).split('_', 1)[0]!r} is forbidden",
             )
         )
-    if not _is_obvious_test_data_path(relative):
-        for match in _IPV4_PATTERN.finditer(text):
-            address_text = match.group(0)
-            try:
-                address = ipaddress.ip_address(address_text)
-            except ValueError:
-                continue
-            if not any(address in network for network in _PRIVATE_NETWORKS):
-                continue
-            if _is_private_range_definition(text, match.end(), address_text):
-                continue
-            violations.append(
-                GuardViolation(
-                    rule="repository-safety",
-                    path=relative,
-                    line=_line_number(text, match.start()),
-                    kind="rfc1918-address",
-                    detail=f"private product address {address_text} is forbidden",
-                )
+    for match in _IPV4_PATTERN.finditer(text):
+        address_text = match.group(0)
+        try:
+            address = ipaddress.ip_address(address_text)
+        except ValueError:
+            continue
+        if not any(address in network for network in _PRIVATE_NETWORKS):
+            continue
+        if _is_private_range_definition(text, match.end(), address_text):
+            continue
+        violations.append(
+            GuardViolation(
+                rule="repository-safety",
+                path=relative,
+                line=_line_number(text, match.start()),
+                kind="rfc1918-address",
+                detail=f"private product address {address_text} is forbidden",
             )
+        )
     return violations
-
-
-def _is_obvious_test_data_path(relative: str) -> bool:
-    parts = PurePosixPath(relative).parts
-    return bool(parts) and parts[0] == "tests"
 
 
 def _is_private_range_definition(text: str, end: int, address: str) -> bool:
