@@ -6,32 +6,32 @@
 
 ## Vorgesehenes Inkrement
 
-`B02 – Architektur- und Scope-Guards`
+`B03 – Atomare, schema-versionierte Bestandskonfiguration`
 
 Vollstaendige Anweisung:
 
-- `tasks/increments/B02-architecture-scope-guards.md`
+- `tasks/increments/B03-atomic-versioned-config.md`
 
 ## Freigabe
 
-B01 wurde nach bestaetigtem Review, gruenem Windows-/Python-3.12-CI-Lauf und Green Gate in `main` gemergt.
+B02 wurde nach Review, geschaerfter RFC1918-Pruefung, 48 gruenen Architekturtests und erfolgreichem Windows-/Python-3.12-CI-Lauf in `main` gemergt.
 
-B02 darf jetzt ausgefuehrt werden. Fuer die Guards ist keine neue externe Abhaengigkeit freigegeben; Standardbibliothek und die bereits vorhandene Testumgebung sind zu verwenden.
+B03 darf jetzt ausgefuehrt werden. Es stabilisiert ausschliesslich die bestehenden getrennten Dateien `host.json` und `client.json` durch Schema-Version 1, atomare Schreibvorgaenge, Migration, Sicherung und kontrollierte Wiederherstellung.
 
-Die verbindlichen Regeln umfassen die bestehenden Importgrenzen von `core`, `host` und `client`, den einzigen freigegebenen Python-Entry-Point sowie den Schutz vor lokalen Konfigurationsdateien, offensichtlichen Geheimnissen und privaten Produktivadressen.
+Keine gemeinsame `app.json`, keine Migration von `mode.txt`, keine neue Abhaengigkeit und keine UI-, Netzwerk-, Audio- oder Entry-Point-Aenderung sind freigegeben.
 
 ## Startprompt
 
 ```text
-Arbeite im aktuell geoeffneten Repository auf dem Branch agent/b02-architecture-scope-guards.
+Arbeite im aktuell geoeffneten Repository auf dem Branch agent/b03-atomic-versioned-config.
 
 Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente in der festgelegten Reihenfolge.
-Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B02.
-Fuehre B02 vollstaendig und selbststaendig bis zum Green Gate aus.
+Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B03.
+Fuehre B03 vollstaendig und selbststaendig bis zum Green Gate aus.
 Beginne keine spaeteren Roadmap-Punkte.
-Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
+Erfuelle alle Tests, den nicht destruktiven Windows-Neustart-Smoke, die Akzeptanzkriterien und Stop-Bedingungen.
 Committe und pushe die vollstaendige Umsetzung.
-Oeffne danach einen Draft-Pull-Request ueber gh oder den vorhandenen GitHub-Connector und beende den Task.
+Oeffne danach einen Draft-Pull-Request ueber gh oder den vorhandenen GitHub-Connector und pruefe GitHub Actions bis zum Ergebnis.
 ```
 
-Codex darf ausschliesslich den freigegebenen Task B02 bearbeiten.
+Codex darf ausschliesslich den freigegebenen Task B03 bearbeiten.
