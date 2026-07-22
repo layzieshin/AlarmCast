@@ -1,0 +1,55 @@
+---
+description: Modulgrenzen, Importregeln und Ordnerstruktur fuer Alarmcast (Python Single-Binary mit --host/--client)
+alwaysApply: true
+---
+
+# Projekt-Architektur
+
+Alarmcast ist eine Single-Binary-Anwendung mit zwei Modi: `--host` und `--client`. Code ist auf drei Pakete verteilt:
+
+```text
+src/alarmcast/
+  core/    # gemeinsam genutzt
+  host/    # nur Host-Modus
+  client/  # nur Client-Modus
+```
+
+## Importgrenzen (hart)
+
+- `core/` darf **nichts** aus `host/` oder `client/` importieren.
+- `host/` und `client/` duerfen **nicht voneinander** importieren.
+- Beide duerfen frei aus `core/` importieren.
+
+```python
+# core/protocol.py
+import struct                              # OK (stdlib)
+# from alarmcast.host import server        # VERBOTEN
+
+# host/server.py
+from alarmcast.core import protocol        # OK
+# from alarmcast.client import overlay     # VERBOTEN
+```
+
+## "Einmal pro Sache" — wo welcher Aspekt lebt
+
+| Aspekt | Datei |
+|---|---|
+| TCP-Frame-Layout, Send-Lock | `core/protocol.py` |
+| Audioformat-Konstanten (48 kHz, Mono, int16, 20 ms) | `core/audio_format.py` |
+| Config-IO (`%APPDATA%\AlarmCast\*.json`) | `core/config.py` |
+| mDNS publish/browse | `core/discovery.py` |
+| PSK-Generierung und Pruefung | `core/security.py` |
+| Logging-Setup | `core/logging_setup.py` |
+| RMS-/Hysterese-/Zeitfenster-Logik | `core/alarm_logic.py` (pure) |
+
+Konstanten und Dateipfade nirgends sonst duplizieren.
+
+## Namen
+
+- Module/Funktionen: `snake_case`. Klassen: `PascalCase`. Konstanten: `UPPER_SNAKE`.
+- Keine Star-Imports.
+- Type-Hints in jeder Public-Funktion verpflichtend.
+
+## Wenn unklar wo etwas hingehoert
+
+Faustregel: brauchen es beide (Host und Client) → `core/`. Beruehrt es I/O-Geraete oder GUI → `host/` bzw. `client/`. Im Zweifel: fragen, nicht raten.

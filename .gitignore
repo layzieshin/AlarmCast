@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# PyInstaller
+build/
+dist/
+
+# Tooling-Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Lokale Konfig (sollte niemals ins Repo)
+host.json
+client.json
+**/AlarmCast/host.json
+**/AlarmCast/client.json

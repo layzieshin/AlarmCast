@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alarmcast"
+version = "0.1.0"
+description = "Alarmcast host/client desktop app for lab alert forwarding"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "PySide6",
+  "soundcard",
+  "sounddevice",
+  "numpy==1.26.4",
+  "zeroconf",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pyinstaller",
+  "ruff",
+  "mypy",
+  "pytest",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = ["numpy", "soundcard", "sounddevice", "zeroconf", "PySide6.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,49 @@
+---
+description: Coding-Stil, Kommentare und Logging-Konventionen fuer Alarmcast (Python).
+alwaysApply: true
+---
+
+# Coding-Stil
+
+Python 3.12. Formatierung: **ruff format**. Lint: **ruff check**. Typen: **mypy** (initial fuer `core/`, spaeter strikt).
+
+## Grundsaetze
+
+- Klarheit > Kuerze. Sprechende Namen, kurze Funktionen.
+- Konstanten in `core/audio_format.py` und `core/protocol.py`. Keine Magic Numbers im Code.
+- Keine globalen Mutables. Konfig wird per Funktion geladen, nicht beim Modulimport.
+- f-Strings statt `%`- oder `.format()`-Formatierung.
+- Type-Hints in jeder Public-Funktion verpflichtend, in privaten empfohlen.
+- Keine Star-Imports.
+
+## Kommentare
+
+Kommentare erklaeren **Intent oder Trade-off**, **nicht** was die naechste Zeile tut.
+
+```python
+# OK
+# Hysterese: verhindert, dass ein Dauerton mehrfach als Signal gezaehlt wird.
+if not above_threshold and last_rms > THRESHOLD:
+    ...
+
+# NICHT OK
+# Zaehler hochzaehlen
+counter += 1
+```
+
+## Logging
+
+`logging`-Modul via `core/logging_setup.py`. **Niemals** `print` im Produktivcode.
+
+- `DEBUG`: Frame-/Paketdetails, RMS-Werte. Nur fuer Diagnose.
+- `INFO`: Lifecycle (Server gestartet, Client verbunden, Alarm an/aus).
+- `WARNING`: Reconnect-Versuche, ungueltige PSK, fehlende Audio-Geraete.
+- `ERROR`: Capture-/Output-Fehler, nicht behebbare Netzfehler.
+
+Format pro Logeintrag: `<level> <module>: <was passiert ist> [<kontext key=value>]`.
+
+## Fehlerbehandlung
+
+- Kein blankes `except:`. Mindestens `except Exception`, besser spezifisch.
+- Bei `socket.timeout`: **nicht** als Verbindungsende behandeln (Lehre aus dem Prototyp).
+- Audio-Callback-Fehler nie nach oben durchschlagen lassen; loggen und Frame stillschweigend ueberspringen.
