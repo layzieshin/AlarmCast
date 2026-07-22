@@ -6,32 +6,42 @@
 
 ## Vorgesehenes Inkrement
 
-`B03 – Atomare, schema-versionierte Bestandskonfiguration`
+`A01 – Alarmcast-Vertragsmodell`
 
 Vollstaendige Anweisung:
 
-- `tasks/increments/B03-atomic-versioned-config.md`
+- `tasks/increments/A01-alarmcast-contract-model.md`
 
-## Freigabe
+## Verbindliche Freigabe
 
-B02 wurde nach Review, geschaerfter RFC1918-Pruefung, 48 gruenen Architekturtests und erfolgreichem Windows-/Python-3.12-CI-Lauf in `main` gemergt.
+B03 wurde nach bestaetigtem Review, 48 gruenen Konfigurationstests, erfolgreichem nicht destruktivem Windows-Neustart-Smoke und gruenem Windows-/Python-3.12-CI-Lauf in `main` gemergt. B03 ist damit `DONE`.
 
-B03 darf jetzt ausgefuehrt werden. Es stabilisiert ausschliesslich die bestehenden getrennten Dateien `host.json` und `client.json` durch Schema-Version 1, atomare Schreibvorgaenge, Migration, Sicherung und kontrollierte Wiederherstellung.
+A01 ist das einzige zur Umsetzung freigegebene Inkrement und besitzt ab diesem Branch den verbindlichen Status `READY`.
 
-Keine gemeinsame `app.json`, keine Migration von `mode.txt`, keine neue Abhaengigkeit und keine UI-, Netzwerk-, Audio- oder Entry-Point-Aenderung sind freigegeben.
+Die noch auf `PLANNED` stehende A01-Zeile in `docs/implementation-roadmap.md` ist eine bekannte vorbereitende Statusinkonsistenz und keine fachliche Sperre. Nach erfolgreicher Baseline muss Codex als erste A01-Aenderung ausschliesslich folgende Roadmapkorrekturen vornehmen:
+
+- B03: `REVIEW` -> `DONE`
+- A01: `PLANNED` -> `IN_PROGRESS`
+
+Im Abschlussstand des Inkrements wird A01 auf `REVIEW` gesetzt. Keine andere Roadmapzeile darf geaendert werden.
+
+A01 fuehrt ausschliesslich unveraenderliche, von Qt, Sockets, Threads und Audioimplementierungen freie Contracts fuer die bestehenden Alarmcast-Zustaende ein.
+
+Keine Fassade, keine Adapter, keine API-Protocols, keine Event-Bus-Integration und keine Aenderung an `core`, `host`, `client`, UI, Protokoll, Konfiguration, Entry Points oder Buildlogik sind freigegeben.
 
 ## Startprompt
 
 ```text
-Arbeite im aktuell geoeffneten Repository auf dem Branch agent/b03-atomic-versioned-config.
+Arbeite im aktuell geoeffneten Repository auf dem Branch agent/a01-alarmcast-contract-model.
 
 Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente in der festgelegten Reihenfolge.
-Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B03.
-Fuehre B03 vollstaendig und selbststaendig bis zum Green Gate aus.
+Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task A01.
+Fuehre zuerst die unveraenderte Baseline aus. Korrigiere danach als erste A01-Aenderung ausschliesslich die in ACTIVE_TASK.md genannten beiden Roadmapstatus.
+Fuehre A01 vollstaendig und selbststaendig bis zum Green Gate aus.
 Beginne keine spaeteren Roadmap-Punkte.
-Erfuelle alle Tests, den nicht destruktiven Windows-Neustart-Smoke, die Akzeptanzkriterien und Stop-Bedingungen.
+Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
 Committe und pushe die vollstaendige Umsetzung.
 Oeffne danach einen Draft-Pull-Request ueber gh oder den vorhandenen GitHub-Connector und pruefe GitHub Actions bis zum Ergebnis.
 ```
 
-Codex darf ausschliesslich den freigegebenen Task B03 bearbeiten.
+Codex darf ausschliesslich den freigegebenen Task A01 bearbeiten.
