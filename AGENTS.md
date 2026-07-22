@@ -10,11 +10,12 @@ Bei Widerspruechen gilt strikt:
 
 1. `docs/specification-1.0.md` – freigegebene fachliche Anforderungen,
 2. `docs/domain-model.md` – kanonische Entitaeten, Beziehungen, Tabellen und Invarianten,
-3. `docs/target-architecture.md` – kanonischer Stack, Module, Entry Points und Abhaengigkeiten,
-4. `docs/implementation-roadmap.md` – Reihenfolge und Scope der Inkremente,
-5. `docs/test-strategy.md` und `docs/definition-of-done.md`,
-6. `tasks/ACTIVE_STAGE.md` und die dort referenzierten Inkrementdateien,
-7. bestehender Code.
+3. `docs/domain-model-clarifications.md` – verbindliche Praezisierung fuer Conversation-Zustand und Screenshot-Lebenszyklus,
+4. `docs/target-architecture.md` – kanonischer Stack, Module, Entry Points und Abhaengigkeiten,
+5. `docs/implementation-roadmap.md` – Reihenfolge und Scope der Inkremente,
+6. `docs/test-strategy.md` und `docs/definition-of-done.md`,
+7. `tasks/ACTIVE_STAGE.md` und die dort referenzierten Inkrementdateien,
+8. bestehender Code.
 
 Bestehender Code ist **keine** Erlaubnis, von einer hoeher priorisierten Vorgabe abzuweichen. Bei einem echten Widerspruch: stoppen, Fundstellen nennen, keine eigene Aufloesung erfinden.
 
@@ -33,14 +34,15 @@ Bestehender Code ist **keine** Erlaubnis, von einer hoeher priorisierten Vorgabe
 1. `AGENTS.md`
 2. `docs/specification-1.0.md`
 3. `docs/domain-model.md`
-4. `docs/target-architecture.md`
-5. `docs/implementation-roadmap.md`
-6. `docs/test-strategy.md`
-7. `docs/definition-of-done.md`
-8. `tasks/ACTIVE_STAGE.md`
-9. die dort referenzierte Etappendatei
-10. die aktuelle Inkrementdatei
-11. vorhandene ADRs unter `docs/decisions/`
+4. `docs/domain-model-clarifications.md`
+5. `docs/target-architecture.md`
+6. `docs/implementation-roadmap.md`
+7. `docs/test-strategy.md`
+8. `docs/definition-of-done.md`
+9. `tasks/ACTIVE_STAGE.md`
+10. die dort referenzierte Etappendatei
+11. die aktuelle Inkrementdatei
+12. vorhandene ADRs unter `docs/decisions/`
 
 Vor dem ersten Edit muss der Agent die relevanten vorhandenen Dateien, Symbole und Tests suchen. Es ist verboten, einen neuen Typ, Service, Entry Point oder Speicherort anzulegen, bevor nach vorhandenen und semantisch aehnlichen Strukturen gesucht wurde.
 
@@ -59,7 +61,7 @@ find src tests -maxdepth 5 -type f
 - Bei abweichendem Branch: stoppen.
 - Vor Beginn muss `git status --short` sauber sein, abgesehen von explizit als Stage-Input genannten Dateien.
 - Verboten: `git reset --hard`, `git clean -fd`, Force-Push, Rebase auf fremde Commits, Aenderungen an `main`.
-- Keine fremden Aenderungen ueberschreiben, stashen oder „aufräumen“.
+- Keine fremden Aenderungen ueberschreiben, stashen oder „aufraeumen“.
 - Vor jedem Inkrementcommit: `git diff --name-only` und `git diff` vollstaendig pruefen.
 
 ## 5. Kanonische Struktur – nicht neu erfinden
@@ -161,13 +163,13 @@ Vor einer neuen Definition muss nach der kanonischen Definition gesucht werden. 
 
 ## 9. Datenmodell- und Persistenzregeln
 
-- Keine neue Entitaet, Tabelle, Spalte, Relation oder Enum ausserhalb von `docs/domain-model.md` oder der aktiven Inkrementdatei.
+- Keine neue Entitaet, Tabelle, Spalte, Relation oder Enum ausserhalb von `docs/domain-model.md`, `docs/domain-model-clarifications.md` oder der aktiven Inkrementdatei.
 - Keine generischen JSON-/JSONB-Felder fuer Kerndomaene, Berechtigungen, Nachrichtenstatus oder Beziehungen.
-- Keine polymorphen „object_type/object_id“-Universaltabellen, wenn das kanonische Modell konkrete Fremdschluessel vorgibt.
+- Keine polymorphen `object_type/object_id`-Universaltabellen, wenn das kanonische Modell konkrete Fremdschluessel vorgibt.
 - Keine generischen CRUD-Repositories oder `BaseRepository`.
 - Jede DB-Aenderung erfolgt ausschliesslich ueber Alembic-Migrationen.
 - Keine Schemaerzeugung per `create_all()` im Produktivstart.
-- Keine direkte SQL-Ausfuehrung ausser im zuständigen Datenbankadapter oder in Migrationen.
+- Keine direkte SQL-Ausfuehrung ausser im zustaendigen Datenbankadapter oder in Migrationen.
 - PostgreSQL ist serverseitige Wahrheit; SQLite ist ausschliesslich lokaler Clientcache und Offline-Queue.
 - Der Clientcache darf keine serverseitigen Berechtigungen ersetzen.
 
@@ -201,17 +203,20 @@ Eine neue Top-Level-Abhaengigkeit ist immer eine Stop-Bedingung, sofern sie nich
 
 ## 11. Typische autonome Agentenfehler – ausdruecklich verboten
 
-- Kein „vorsorgliches“ Scaffolding fuer spaetere Inkremente.
+- Kein vorsorgliches Scaffolding fuer spaetere Inkremente.
 - Keine leeren Module, Platzhalterklassen, `pass`, `TODO`, `NotImplementedError` oder Fake-Implementierungen, sofern der Task sie nicht ausdruecklich verlangt.
-- Keine zweite Implementierung neben der bestehenden „zur Sicherheit“.
+- Keine zweite Implementierung neben der bestehenden zur Sicherheit.
 - Keine Compatibility-Wrapper oder Re-Exports, nur um Imports schnell gruen zu machen.
 - Keine breiten `except Exception` mit stillen Defaults.
 - Keine Ruecksetzung defekter Konfiguration auf Standardwerte ohne sichtbaren Fehler und getestete Recovery-Regel.
 - Keine In-Memory-Ersatzpersistenz im Produktionspfad, wenn PostgreSQL oder SQLite vorgesehen ist.
 - Keine Mock-Daten, Demo-Nutzer oder automatische Seed-Daten im Produktivstart.
 - Keine hardcodierten Hostnamen, Ports, PSKs, Tokens oder Dateipfade ausser kanonischen Defaultkonstanten.
-- Keine Synchronisierung durch `sleep()` oder polling, wenn das kanonische Event-/Heartbeat-Modell vorgesehen ist.
+- Keine Synchronisierung durch `sleep()` oder Polling, wenn das kanonische Event-/Heartbeat-Modell vorgesehen ist.
 - Keine UI-Logik, die serverseitige Autorisierung ersetzt.
+- Kein Screenshotversand vor N01; U07 ist ausschliesslich lokale Clipboard-Erfassung und Vorschau.
+- Keine allgemeine Upload-, TemporaryUpload- oder AttachmentDraft-Struktur; Screenshotversand folgt exakt `docs/domain-model-clarifications.md`.
+- Persoenliches Archivieren/Pinning/Muting verwendet ausschliesslich `user_conversation_states`; keine Conversation-spezifischen Parallelmodelle.
 - Keine Tests, die private Implementierungsdetails fixieren, wenn ein oeffentlicher Vertrag pruefbar ist.
 - Keine Aenderung bestehender Tests, bevor geklaert ist, ob der Code oder der Test von der Spezifikation abweicht.
 - Keine Formatierung oder Umbenennung unbeteiligter Dateien.
