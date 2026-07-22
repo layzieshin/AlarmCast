@@ -1,0 +1,45 @@
+---
+description: Sichere Aenderungen an bestehenden Dateien. Erst lesen, dann gezielt editieren, bestehende Logik bewahren.
+alwaysApply: true
+---
+
+# Sicher editieren
+
+Diese Regeln gelten fuer **jede** Aenderung an einer Datei, die schon existiert.
+
+## Vor dem Edit
+
+1. **Lies die Datei vollstaendig**, mindestens den umgebenden Funktions-/Klassenkontext.
+2. Pruefe Verwendungen: wer importiert die Funktion/Klasse? (Grep ueber das Repo)
+3. Bei groesseren Refactorings: lies auch die Tests.
+
+## Beim Edit
+
+- Aenderung so klein wie moeglich. Ein Thema pro Edit-Runde.
+- **Bestehende Funktionalitaet darf nicht entfernt werden**, ausser der Auftrag verlangt es explizit.
+- Keine globalen Stil-/Formatierungsaenderungen mitnehmen ("while you're at it" ist verboten).
+- Kein Wechsel von Bibliotheken oder Patterns ohne explizite Erlaubnis.
+- Keine Blind-Replace via globalem Search-and-Replace, das mehrere Dateien beruehrt, ohne vorher jedes Treffermuster gesehen zu haben.
+
+## Bei Mehrdeutigkeit
+
+Wenn nicht klar ist, was gemeint ist: **erst fragen** oder zwei kommentierte Optionen vorschlagen.
+
+```python
+# Variante A: einfach, blockierend
+def receive_until(sock, n): ...
+
+# Variante B: asyncio, mehr Code, nicht-blockierend
+async def receive_until(reader, n): ...
+```
+
+## Nach dem Edit
+
+Kurzer Abschlussbericht im Chat in genau diesem Schema:
+
+```text
+Geaendert:        <Dateien mit Pfad>
+Unveraendert:     <was bewusst nicht angefasst wurde>
+Risiko:           <was koennte brechen, was muss manuell geprueft werden>
+Naechster Schritt: <Test, Review, naechste Aufgabe>
+```

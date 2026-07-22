@@ -1,0 +1,43 @@
+---
+description: Verifikation nach Aenderungen. Tests/Lint/Build ausfuehren oder manuelle Pruefliste angeben.
+alwaysApply: true
+---
+
+# Verifikation
+
+Nach **jeder** Aenderung pruefen — keine gruenen Haken setzen ohne tatsaechliche Ausfuehrung.
+
+## Automatisch (sobald Phase 2 aufgesetzt ist)
+
+```text
+ruff check .
+ruff format --check .
+mypy src
+pytest -q
+```
+
+Ausgabe (zumindest die letzten Zeilen mit Ergebnis) im Abschlussbericht zeigen. Wenn ein Befehl noch nicht existiert: als `TODO` markieren, nicht als bestanden.
+
+## Manuell, wenn keine Tests greifen (Audio/GUI/Netz)
+
+Konkrete Pruefliste fuer den Alarm-Pfad:
+
+1. `alarmcast --host` starten. PSK aus dem Host-Settings-Fenster notieren.
+2. `alarmcast --client` auf zweitem PC starten, PSK eintragen. mDNS findet den Host automatisch.
+3. Am Host-PC zwei kurze Toene innerhalb von 3 s ausloesen (z. B. zweimal Systemton).
+4. Erwartung: an allen Clients spielt der Ton (sofern nicht gemutet) **und** das gelbe Warndreieck blinkt oben rechts auf jedem Monitor.
+5. "Reset" am Client druecken: Overlays an allen Clients muessen verschwinden.
+6. Client beenden und neu starten: muss automatisch reconnecten.
+
+Pruefliste an die jeweilige Aenderung anpassen — nicht stumpf kopieren.
+
+## Negativ-Pruefungen nicht vergessen
+
+- Falsche PSK → Verbindung wird abgewiesen, kein Audio fliesst, WARN-Log am Host.
+- Host weg → Client zeigt "Suche Host", verbraucht keine CPU im Leerlauf.
+- mDNS blockiert → manuelle Host-Adresse muss weiterhin funktionieren.
+
+## Verbote
+
+- Niemals `OK` schreiben fuer Pruefungen, die nicht gelaufen sind.
+- Niemals `pytest` als "bestanden" melden, ohne die Ausgabe gesehen zu haben.
