@@ -6,32 +6,32 @@
 
 ## Vorgesehenes Inkrement
 
-`B03 – Atomare, schema-versionierte Bestandskonfiguration`
+`A01 – Alarmcast-Vertragsmodell`
 
 Vollstaendige Anweisung:
 
-- `tasks/increments/B03-atomic-versioned-config.md`
+- `tasks/increments/A01-alarmcast-contract-model.md`
 
 ## Freigabe
 
-B02 wurde nach Review, geschaerfter RFC1918-Pruefung, 48 gruenen Architekturtests und erfolgreichem Windows-/Python-3.12-CI-Lauf in `main` gemergt.
+B03 wurde nach bestaetigtem Review, 48 gruenen Konfigurationstests, erfolgreichem nicht destruktivem Windows-Neustart-Smoke und gruenem Windows-/Python-3.12-CI-Lauf in `main` gemergt.
 
-B03 darf jetzt ausgefuehrt werden. Es stabilisiert ausschliesslich die bestehenden getrennten Dateien `host.json` und `client.json` durch Schema-Version 1, atomare Schreibvorgaenge, Migration, Sicherung und kontrollierte Wiederherstellung.
+A01 darf jetzt ausgefuehrt werden. Es fuehrt ausschliesslich unveraenderliche, von Qt, Sockets, Threads und Audioimplementierungen freie Contracts fuer die bestehenden Alarmcast-Zustaende ein.
 
-Keine gemeinsame `app.json`, keine Migration von `mode.txt`, keine neue Abhaengigkeit und keine UI-, Netzwerk-, Audio- oder Entry-Point-Aenderung sind freigegeben.
+Keine Fassade, keine Adapter, keine API-Protocols, keine Event-Bus-Integration und keine Aenderung an `core`, `host`, `client`, UI, Protokoll, Konfiguration, Entry Points oder Buildlogik sind freigegeben.
 
 ## Startprompt
 
 ```text
-Arbeite im aktuell geoeffneten Repository auf dem Branch agent/b03-atomic-versioned-config.
+Arbeite im aktuell geoeffneten Repository auf dem Branch agent/a01-alarmcast-contract-model.
 
 Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente in der festgelegten Reihenfolge.
-Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B03.
-Fuehre B03 vollstaendig und selbststaendig bis zum Green Gate aus.
+Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task A01.
+Fuehre A01 vollstaendig und selbststaendig bis zum Green Gate aus.
 Beginne keine spaeteren Roadmap-Punkte.
-Erfuelle alle Tests, den nicht destruktiven Windows-Neustart-Smoke, die Akzeptanzkriterien und Stop-Bedingungen.
+Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
 Committe und pushe die vollstaendige Umsetzung.
 Oeffne danach einen Draft-Pull-Request ueber gh oder den vorhandenen GitHub-Connector und pruefe GitHub Actions bis zum Ergebnis.
 ```
 
-Codex darf ausschliesslich den freigegebenen Task B03 bearbeiten.
+Codex darf ausschliesslich den freigegebenen Task A01 bearbeiten.
