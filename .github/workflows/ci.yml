@@ -44,5 +44,8 @@ jobs:
       - name: Mypy
         run: uv run --frozen mypy src
 
+      - name: Architecture guards
+        run: uv run --frozen pytest -q tests/architecture
+
       - name: Pytest
         run: uv run --frozen pytest -q

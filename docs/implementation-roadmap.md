@@ -44,7 +44,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B01 – Reproduzierbare Entwicklungsumgebung und CI
 
-**Status:** `REVIEW`
+**Status:** `DONE`
 **Abhaengigkeit:** B00.  
 **Ziel:** Python-3.12-Umgebung und GitHub Actions fuer Baseline-Pruefungen.  
 **Scope:** Lock-/Installationsweg dokumentieren, Windows-CI fuer Lint, Format, Typen und Tests; keine Produktfunktion.  
@@ -53,7 +53,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B02 – Architektur- und Scope-Guards
 
-**Status:** `PLANNED`  
+**Status:** `REVIEW`
 **Abhaengigkeit:** B01.  
 **Ziel:** Automatische Schutztests fuer bestehende und kuenftige Modulgrenzen.  
 **Scope:** Tests gegen `core -> host/client`, `host <-> client`, verbotene Secrets/Configdateien und unerlaubte Entry Points.  
