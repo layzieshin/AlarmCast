@@ -6,43 +6,32 @@
 
 ## Vorgesehenes Inkrement
 
-`B00 – Originalen Alarmcast-Bestand importieren`
+`B01 – Reproduzierbare Entwicklungsumgebung und CI`
 
 Vollstaendige Anweisung:
 
-- `tasks/increments/B00-import-baseline.md`
+- `tasks/increments/B01-development-environment-ci.md`
 
-## Freigabepruefung
+## Freigabe
 
-Die originale Projektdatei wurde auf dem Arbeitsbranch als
-`bootstrap/alarmcast-baseline.zip` bereitgestellt.
+B00 wurde nach bestaetigtem Review und Green Gate in `main` gemergt.
 
-Pfad, Dateigroesse und SHA-256-Pruefsumme wurden geprueft und stimmen mit den erwarteten Werten ueberein.
+Fuer B01 ist `uv` als Werkzeug fuer Python-Version, Lockfile, virtuelle Entwicklungsumgebung und reproduzierbaren Dependency-Sync ausdruecklich menschlich freigegeben. Dies erlaubt keine andere neue Toolchain oder Runtime-Abhaengigkeit.
 
-Erwartete SHA-256-Pruefsumme:
+Der Eintrag fuer B01 in `docs/implementation-roadmap.md` steht auf dem Ausgangsstand noch auf `PLANNED`. Diese menschliche Freigabe ist die verbindliche Entscheidung, B01 jetzt auszufuehren. Die Roadmap-Statuswerte werden innerhalb des Tasks gemaess Inkrementdatei aktualisiert.
 
-```text
-879e12eacbc7102b45952069c5582d456b55d4cfa12d3f55ea9e77e77334b99e
-```
-
-Erwartete Archivgroesse:
+## Startprompt
 
 ```text
-80584 Bytes
-```
+Arbeite im aktuell geoeffneten Repository auf dem Branch agent/b01-dev-environment-ci.
 
-Der Task ist nach erfolgreicher Pruefung von Pfad, Dateigroesse und SHA-256 fuer die Ausfuehrung freigegeben.
-
-## Startprompt nach Freigabe
-
-```text
-Arbeite im Repository layzieshin/AlarmCast.
-
-Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente.
-Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task.
+Lies zuerst AGENTS.md und danach alle dort vorgeschriebenen Dokumente in der festgelegten Reihenfolge.
+Bearbeite ausschliesslich den in tasks/ACTIVE_TASK.md freigegebenen Task B01.
+Fuehre B01 vollstaendig und selbststaendig bis zum Green Gate aus.
 Beginne keine spaeteren Roadmap-Punkte.
 Erfuelle alle Tests, Akzeptanzkriterien und Stop-Bedingungen.
-Oeffne danach einen Draft-Pull-Request und beende den Task.
+Committe und pushe die vollstaendige Umsetzung.
+Oeffne danach einen Draft-Pull-Request, sofern die vorhandenen Werkzeuge dies erlauben, und beende den Task.
 ```
 
-Codex darf ausschliesslich den freigegebenen Task B00 bearbeiten.
+Codex darf ausschliesslich den freigegebenen Task B01 bearbeiten.
