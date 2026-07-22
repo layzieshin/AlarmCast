@@ -36,7 +36,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B00 – Originalen Alarmcast-Bestand importieren
 
-**Status:** `BLOCKED` bis `bootstrap/alarmcast-baseline.zip` vorhanden ist.  
+**Status:** `DONE`
 **Ziel:** Den originalen hochgeladenen Alarmcast-Stand unveraendert als Repository-Baseline herstellen.  
 **Scope:** ZIP entpacken, generierte `*.egg-info`-Dateien ausschliessen, Bootstrap-ZIP entfernen, Dateiliste und SHA-256 dokumentieren. Keine Produktcodeaenderung.  
 **Tests:** vorhandene Befehle ausfuehren; Abweichungen als Baseline dokumentieren; `python -m compileall src`.  
@@ -44,7 +44,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B01 – Reproduzierbare Entwicklungsumgebung und CI
 
-**Status:** `PLANNED`  
+**Status:** `REVIEW`
 **Abhaengigkeit:** B00.  
 **Ziel:** Python-3.12-Umgebung und GitHub Actions fuer Baseline-Pruefungen.  
 **Scope:** Lock-/Installationsweg dokumentieren, Windows-CI fuer Lint, Format, Typen und Tests; keine Produktfunktion.  

@@ -99,4 +99,5 @@ def _float_to_pcm16_mono_bytes(data: np.ndarray) -> bytes:
         data = data[:, 0]
     mono = np.asarray(data, dtype=np.float32)
     pcm = np.clip(mono * 32767.0, -32768, 32767).astype(np.int16)
-    return pcm.tobytes()
+    payload: bytes = pcm.tobytes()
+    return payload
