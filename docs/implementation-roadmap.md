@@ -53,7 +53,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B02 – Architektur- und Scope-Guards
 
-**Status:** `REVIEW`
+**Status:** `DONE`
 **Abhaengigkeit:** B01.  
 **Ziel:** Automatische Schutztests fuer bestehende und kuenftige Modulgrenzen.  
 **Scope:** Tests gegen `core -> host/client`, `host <-> client`, verbotene Secrets/Configdateien und unerlaubte Entry Points.  
@@ -62,7 +62,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B03 – Atomare, schema-versionierte Bestandskonfiguration
 
-**Status:** `PLANNED`  
+**Status:** `REVIEW`
 **Abhaengigkeit:** B02.  
 **Ziel:** `host.json` und `client.json` sicher, versioniert und rueckwaertskompatibel speichern.  
 **Scope:** atomarer Replace, Schema-Version, Migration unversionierter Dateien, Erhalt unbekannter oder dokumentiert verworfener Werte. Keine gemeinsame `app.json`.  

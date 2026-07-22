@@ -117,11 +117,14 @@ Verzeichnis: `%APPDATA%\AlarmCast\`. Kein Fallback auf "neben EXE" (vermeidet Ko
 
 ```json
 {
+  "schema_version": 1,
   "psk": "...",
   "threshold_rms": 0.06,
   "signal_target": 2,
   "window_seconds": 3.0,
-  "tcp_port": 50050
+  "tcp_port": 50050,
+  "autostart_with_windows": true,
+  "auto_start_runtime": true
 }
 ```
 
@@ -129,14 +132,20 @@ Verzeichnis: `%APPDATA%\AlarmCast\`. Kein Fallback auf "neben EXE" (vermeidet Ko
 
 ```json
 {
+  "schema_version": 1,
   "host_addr": "",
   "psk": "",
   "volume": 0.9,
   "muted": false,
   "output_device_id": -1,
-  "autostart_with_windows": true
+  "autostart_with_windows": true,
+  "auto_connect": true,
+  "message_overlay_enabled": true
 }
 ```
+
+Atomare Schreibvorgaenge, Migration, Sicherung und Recovery sind in
+[`configuration-persistence.md`](configuration-persistence.md) beschrieben.
 
 `host_addr` leer → Client nutzt mDNS. Eintrag ueberschreibt Discovery.
 
