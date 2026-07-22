@@ -67,7 +67,7 @@ def test_load_host_config_new_flags(tmp_path: Path) -> None:
 
 def test_save_client_config_writes_json_shape(tmp_path: Path) -> None:
     path = tmp_path / "client.json"
-    save_client_config(ClientConfig(host_addr="10.0.0.5", psk="abc"), path)
+    save_client_config(ClientConfig(host_addr="192.0.2.5", psk="abc"), path)
     raw = json.loads(path.read_text(encoding="utf-8"))
-    assert raw["host_addr"] == "10.0.0.5"
+    assert raw["host_addr"] == "192.0.2.5"
     assert raw["psk"] == "abc"

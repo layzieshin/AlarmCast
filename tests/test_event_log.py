@@ -11,7 +11,7 @@ def test_append_and_read_recent(tmp_path: Path, monkeypatch: object) -> None:
     path = tmp_path / "events.jsonl"
     monkeypatch.setattr(event_log, "events_path", lambda: path)
 
-    event_log.append_event("client_connected", {"name": "PC1", "addr": "10.0.0.1:1"})
+    event_log.append_event("client_connected", {"name": "PC1", "addr": "192.0.2.1:1"})
     event_log.append_event("alarm_on")
 
     entries = event_log.read_recent()
