@@ -62,7 +62,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### B03 – Atomare, schema-versionierte Bestandskonfiguration
 
-**Status:** `REVIEW`
+**Status:** `DONE`
 **Abhaengigkeit:** B02.  
 **Ziel:** `host.json` und `client.json` sicher, versioniert und rueckwaertskompatibel speichern.  
 **Scope:** atomarer Replace, Schema-Version, Migration unversionierter Dateien, Erhalt unbekannter oder dokumentiert verworfener Werte. Keine gemeinsame `app.json`.  
@@ -74,7 +74,7 @@ Jedes Inkrement muss zusaetzlich zu seinen eigenen Kriterien erfuellen:
 
 ### A01 – Alarmcast-Vertragsmodell
 
-**Status:** `PLANNED`  
+**Status:** `REVIEW`
 **Abhaengigkeit:** B03.  
 **Ziel:** Unveraenderliche Contracts fuer Quelle, Ueberwacher, Alarmstatus, Verbindung und Reset.  
 **Scope:** nur Contracts und Tests; keine UI- oder Laufzeitaenderung.  
